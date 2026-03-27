@@ -39,30 +39,39 @@
         />
       </div>
 
-      <!-- Gráficos de users -->
+      <!-- Chart1 e Chart2 -->
       <div class="row">
         <div class="card">
-          <h3>Users by age group</h3>
-          <Bar :data="ageChartData" :options="barOptions" />
+          <h3>Avg. review rating by user segment</h3>
+          <UserReviewBarChart
+            :userReviewData="usersInsights.user_review_data"
+            :filterOptions="usersInsights.filter_options"
+          />
         </div>
         <div class="card">
-          <h3>Gender distribution</h3>
-          <Doughnut :data="genderChartData" :options="doughnutOptions" />
+          <h3>Users by avg. review rating</h3>
+          <UserReviewDoughnutChart
+            :userReviewData="usersInsights.user_review_data"
+            :noReviewCount="usersInsights.no_review_count"
+            :totalUsers="usersInsights.total_users"
+            :filterOptions="usersInsights.filter_options"
+          />
         </div>
       </div>
 
-      <!-- Tabela de produtos recentes + disponibilidade -->
-      <div class="row row--asymmetric">
+      <!-- Table1 e Table2 -->
+      <div class="row">
         <div class="card">
-          <div class="card-header">
-            <h3>Recent products</h3>
-            <RouterLink to="/products/all" class="see-more">See all</RouterLink>
-          </div>
-          <DataTable :columns="productColumns" :data="productsSummary.recent_products" />
+          <h3>Product aggregation</h3>
+          <ProductAggregationTable
+            :aggregationData="productsAggregation"
+          />
         </div>
         <div class="card">
-          <h3>Availability</h3>
-          <Doughnut :data="availabilityChartData" :options="doughnutOptions" />
+          <h3>Review aggregation by user segment</h3>
+          <UserReviewAggregationTable
+            :userReviewData="usersInsights.user_review_data"
+          />
         </div>
       </div>
 
@@ -71,71 +80,14 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { Bar, Doughnut } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js'
-
 import StatCard from '../components/StatCard.vue'
-import DataTable from '../components/DataTable.vue'
+import UserReviewBarChart from '../components/charts/UserReviewBarChart.vue'
+import UserReviewDoughnutChart from '../components/charts/UserReviewDoughnutChart.vue'
+import ProductAggregationTable from '../components/tables/ProductAggregationTable.vue'
+import UserReviewAggregationTable from '../components/tables/UserReviewAggregationTable.vue'
 import { useHome } from '../composables/useHome'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend)
-
-const { usersSummary, productsSummary, loading, error } = useHome()
-
-const ageChartData = computed(() => ({
-  labels: Object.keys(usersSummary.value?.age_groups || {}),
-  datasets: [{
-    label: 'Users',
-    data: Object.values(usersSummary.value?.age_groups || {}),
-    backgroundColor: '#378ADD',
-    borderRadius: 6
-  }]
-}))
-
-const genderChartData = computed(() => ({
-  labels: Object.keys(usersSummary.value?.gender_distribution || {}),
-  datasets: [{
-    data: Object.values(usersSummary.value?.gender_distribution || {}),
-    backgroundColor: ['#378ADD', '#D4537E']
-  }]
-}))
-
-const availabilityChartData = computed(() => ({
-  labels: Object.keys(productsSummary.value?.availability_distribution || {}),
-  datasets: [{
-    data: Object.values(productsSummary.value?.availability_distribution || {}),
-    backgroundColor: ['#639922', '#BA7517', '#E24B4A']
-  }]
-}))
-
-const barOptions = {
-  responsive: true,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-    x: { grid: { display: false } }
-  }
-}
-
-const doughnutOptions = {
-  responsive: true,
-  plugins: { legend: { position: 'bottom' } }
-}
-
-const productColumns = [
-  { field: 'title', header: 'Product' },
-  { field: 'price', header: 'Price', prefix: '$' },
-  { field: 'availabilityStatus', header: 'Status' }
-]
+const { usersSummary, productsSummary, usersInsights, productsAggregation, loading, error } = useHome()
 </script>
 
 <style scoped>
@@ -169,10 +121,6 @@ const productColumns = [
   gap: 1rem;
 }
 
-.row--asymmetric {
-  grid-template-columns: 1.5fr 1fr;
-}
-
 .card {
   background: #ffffff;
   border: 0.5px solid #e5e7eb;
@@ -187,22 +135,6 @@ const productColumns = [
   font-size: 0.9rem;
   font-weight: 500;
   color: #111827;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.see-more {
-  font-size: 0.8rem;
-  color: #1d4ed8;
-  text-decoration: none;
-}
-
-.see-more:hover {
-  text-decoration: underline;
 }
 
 .loading {
@@ -220,7 +152,7 @@ const productColumns = [
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .row, .row--asymmetric {
+  .row {
     grid-template-columns: 1fr;
   }
 }

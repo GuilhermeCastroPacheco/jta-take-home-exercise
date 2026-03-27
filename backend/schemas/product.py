@@ -5,6 +5,7 @@ class ReviewSchema(BaseModel):
     rating: int
     comment: str
     reviewerName: str
+    reviewerEmail: str
 
 class ProductSchema(BaseModel):
     id: int

@@ -20,15 +20,9 @@
           badgeType="green"
         />
         <StatCard
-          label="Male"
-          :value="usersSummary.gender_distribution.male"
-          badge="Users"
-          badgeType="green"
-        />
-        <StatCard
-          label="Female"
-          :value="usersSummary.gender_distribution.female"
-          badge="Users"
+          label="Users with avg. rating ≥ 4"
+          :value="`${highRatingPct}%`"
+          badge="Of users with reviews"
           badgeType="green"
         />
         <StatCard
@@ -39,27 +33,15 @@
         />
       </div>
 
-      <!-- Gráficos -->
+      <!-- Mapa + Gráfico circular -->
       <div class="row">
-        <div class="card">
-          <h3>Users by age group</h3>
-          <Bar :data="ageChartData" :options="barOptions" />
+        <div class="card card--wide">
+          <h3>User distribution by location</h3>
+          <UsersGeoMap :geoData="usersGeo" />
         </div>
         <div class="card">
-          <h3>Users by role</h3>
-          <Doughnut :data="roleChartData" :options="doughnutOptions" />
-        </div>
-      </div>
-
-      <!-- Top companies -->
-      <div class="row row--asymmetric">
-        <div class="card">
-          <h3>Top companies</h3>
-          <Bar :data="companiesChartData" :options="horizontalBarOptions" />
-        </div>
-        <div class="card">
-          <h3>Gender distribution</h3>
-          <Doughnut :data="genderChartData" :options="doughnutOptions" />
+          <h3>Users by segment</h3>
+          <UsersSegmentChart :usersSummary="usersSummary" />
         </div>
       </div>
 
@@ -78,93 +60,27 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Bar, Doughnut } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js'
-
 import StatCard from '../../components/StatCard.vue'
 import DataTable from '../../components/DataTable.vue'
+import UsersGeoMap from '../../components/charts/UsersGeoMap.vue'
+import UsersSegmentChart from '../../components/charts/UsersSegmentChart.vue'
 import { useUsers } from '../../composables/useUsers'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend)
-
-const { usersSummary, loading, error } = useUsers()
+const { usersSummary, usersGeo, loading, error } = useUsers()
 
 const avgAge = computed(() => {
   if (!usersSummary.value?.age_groups) return 0
-  const groups = { '18-25': 21, '26-35': 30, '36-50': 43, '50+': 57 }
+  const groups = { '18-25': 21, '26-30': 28, '31-35': 33, '36-40': 38, '40+': 47 }
   const total = Object.values(usersSummary.value.age_groups).reduce((a, b) => a + b, 0)
   const weighted = Object.entries(usersSummary.value.age_groups)
     .reduce((sum, [key, val]) => sum + (groups[key] * val), 0)
   return (weighted / total).toFixed(1)
 })
 
-const ageChartData = computed(() => ({
-  labels: Object.keys(usersSummary.value?.age_groups || {}),
-  datasets: [{
-    label: 'Users',
-    data: Object.values(usersSummary.value?.age_groups || {}),
-    backgroundColor: '#378ADD',
-    borderRadius: 6
-  }]
-}))
-
-const genderChartData = computed(() => ({
-  labels: Object.keys(usersSummary.value?.gender_distribution || {}),
-  datasets: [{
-    data: Object.values(usersSummary.value?.gender_distribution || {}),
-    backgroundColor: ['#378ADD', '#D4537E']
-  }]
-}))
-
-const roleChartData = computed(() => ({
-  labels: Object.keys(usersSummary.value?.role_distribution || {}),
-  datasets: [{
-    data: Object.values(usersSummary.value?.role_distribution || {}),
-    backgroundColor: ['#378ADD', '#639922', '#BA7517', '#D4537E']
-  }]
-}))
-
-const companiesChartData = computed(() => ({
-  labels: (usersSummary.value?.top_companies || []).map(c => c.name),
-  datasets: [{
-    label: 'Users',
-    data: (usersSummary.value?.top_companies || []).map(c => c.count),
-    backgroundColor: '#378ADD',
-    borderRadius: 6
-  }]
-}))
-
-const barOptions = {
-  responsive: true,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-    x: { grid: { display: false } }
-  }
-}
-
-const horizontalBarOptions = {
-  responsive: true,
-  indexAxis: 'y',
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-    y: { grid: { display: false } }
-  }
-}
-
-const doughnutOptions = {
-  responsive: true,
-  plugins: { legend: { position: 'bottom' } }
-}
+const highRatingPct = computed(() => {
+  if (!usersSummary.value?.high_rating_pct) return 0
+  return usersSummary.value.high_rating_pct
+})
 
 const userColumns = [
   { field: 'firstName', header: 'First name' },
@@ -196,18 +112,14 @@ const userColumns = [
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.row--asymmetric {
   grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
 }
 
 .card {
@@ -257,7 +169,7 @@ const userColumns = [
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .row, .row--asymmetric {
+  .row {
     grid-template-columns: 1fr;
   }
 }

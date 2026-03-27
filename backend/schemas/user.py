@@ -10,6 +10,7 @@ class CompanySchema(BaseModel):
     name: str
     department: str
     title: str
+    address: AddressSchema
 
 class UserSchema(BaseModel):
     id: int

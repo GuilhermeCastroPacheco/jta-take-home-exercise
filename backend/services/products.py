@@ -126,3 +126,34 @@ async def get_product_detail(product_id: int) -> dict:
     raw = await fetch_product(product_id)
     product = ProductSchema(**raw)
     return product.model_dump()
+
+async def get_products_aggregation() -> dict:
+    raw = await fetch_products()
+    products = parse_products(raw)
+
+    all_categories = sorted(set(p.category for p in products))
+    all_brands = sorted(set(p.brand for p in products if p.brand))
+    all_tags = sorted(set(tag for p in products for tag in p.tags))
+
+    def aggregate(items):
+        prices = [p.price for p in items]
+        stocks = [p.stock for p in items]
+        ratings = [p.rating for p in items]
+        return {
+            "count": len(items),
+            "price": {"min": min(prices), "max": max(prices), "avg": round(sum(prices)/len(prices), 2)},
+            "stock": {"min": min(stocks), "max": max(stocks), "avg": round(sum(stocks)/len(stocks), 2)},
+            "rating": {"min": min(ratings), "max": max(ratings), "avg": round(sum(ratings)/len(ratings), 2)},
+        }
+
+    return {
+        "overall": aggregate(products),
+        "by_category": {cat: aggregate([p for p in products if p.category == cat]) for cat in all_categories},
+        "by_brand": {brand: aggregate([p for p in products if p.brand == brand]) for brand in all_brands},
+        "by_tag": {tag: aggregate([p for p in products if tag in p.tags]) for tag in all_tags},
+        "filter_options": {
+            "categories": all_categories,
+            "brands": all_brands,
+            "tags": all_tags
+        }
+    }
