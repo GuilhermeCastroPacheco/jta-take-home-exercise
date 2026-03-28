@@ -2,9 +2,12 @@
   <div class="product-detail">
 
     <div class="page-header">
-      <div>
-        <h1 v-if="product">{{ product.title }}</h1>
-        <p v-if="product">{{ product.category }} · {{ product.brand || 'No brand' }}</p>
+      <div class="header-left">
+        <div>
+          <h1 v-if="product">{{ product.title }}</h1>
+          <p v-if="product" class="product-sku">{{ product.sku }}</p>
+        </div>
+        <span v-if="product" class="pill" :class="statusClass">{{ product.availabilityStatus }}</span>
       </div>
       <RouterLink to="/products/all" class="back-link">
         <i class="pi pi-arrow-left" /> Back to products
@@ -15,13 +18,36 @@
     <div v-else-if="error" class="error">{{ error }}</div>
 
     <template v-else-if="product">
+      <!-- Description -->
+      <div class="card card--description">
+        <img :src="product.thumbnail" :alt="product.title" class="product-image-large" />
+        <div class="description-content">
+          <h3>Description</h3>
+          <p class="description-text">{{ product.description }}</p>
+        </div>
+      </div>
 
       <div class="row">
-
-        <!-- Imagem e info principal -->
-        <div class="card card--image">
-          <img :src="product.thumbnail" :alt="product.title" class="product-image" />
+        <!-- Product info -->
+        <div class="card">
+          <h3>Product info</h3>
           <div class="info-list">
+            <div class="info-row">
+              <span class="info-label">Category</span>
+              <span class="info-value">{{ product.category }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Brand</span>
+              <span class="info-value">{{ product.brand || '—' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Tags</span>
+              <span class="info-value">
+                <div class="tag-list">
+                  <span v-for="tag in product.tags" :key="tag" class="tag">{{ tag }}</span>
+                </div>
+              </span>
+            </div>
             <div class="info-row">
               <span class="info-label">Price</span>
               <span class="info-value">${{ product.price }}</span>
@@ -42,26 +68,28 @@
               <span class="info-label">Min. order qty</span>
               <span class="info-value">{{ product.minimumOrderQuantity }}</span>
             </div>
-            <div class="info-row">
-              <span class="info-label">Status</span>
-              <span class="info-value">
-                <span class="pill" :class="statusClass">{{ product.availabilityStatus }}</span>
-              </span>
-            </div>
           </div>
         </div>
 
-        <!-- Detalhes -->
+        <!-- Details -->
         <div class="card">
           <h3>Details</h3>
           <div class="info-list">
             <div class="info-row">
-              <span class="info-label">SKU</span>
-              <span class="info-value">{{ product.sku }}</span>
+              <span class="info-label">Weight</span>
+              <span class="info-value">{{ product.weight }} kg</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Return policy</span>
-              <span class="info-value">{{ product.returnPolicy }}</span>
+              <span class="info-label">Width</span>
+              <span class="info-value">{{ product.dimensions?.width }} cm</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Height</span>
+              <span class="info-value">{{ product.dimensions?.height }} cm</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Depth</span>
+              <span class="info-value">{{ product.dimensions?.depth }} cm</span>
             </div>
             <div class="info-row">
               <span class="info-label">Warranty</span>
@@ -71,10 +99,10 @@
               <span class="info-label">Shipping</span>
               <span class="info-value">{{ product.shippingInformation }}</span>
             </div>
-          </div>
-          <h3>Tags</h3>
-          <div class="tags">
-            <span v-for="tag in product.tags" :key="tag" class="tag">{{ tag }}</span>
+            <div class="info-row">
+              <span class="info-label">Return policy</span>
+              <span class="info-value">{{ product.returnPolicy }}</span>
+            </div>
           </div>
         </div>
 
@@ -120,19 +148,19 @@ onMounted(async () => {
   }
 })
 
-const stockClass = computed(() => {
-  if (!product.value) return ''
-  if (product.value.stock < product.value.minimumOrderQuantity) return 'stock-red'
-  if (product.value.stock < product.value.minimumOrderQuantity * 2) return 'stock-amber'
-  return ''
-})
-
 const statusClass = computed(() => {
   if (!product.value) return ''
   const s = product.value.availabilityStatus.toLowerCase()
   if (s.includes('low')) return 'pill-amber'
   if (s.includes('out')) return 'pill-red'
   return 'pill-green'
+})
+
+const stockClass = computed(() => {
+  if (!product.value) return ''
+  if (product.value.stock < product.value.minimumOrderQuantity) return 'stock-red'
+  if (product.value.stock < product.value.minimumOrderQuantity * 2) return 'stock-amber'
+  return ''
 })
 </script>
 
@@ -149,13 +177,19 @@ const statusClass = computed(() => {
   justify-content: space-between;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .page-header h1 {
   font-size: 1.4rem;
   font-weight: 500;
   color: #111827;
 }
 
-.page-header p {
+.product-sku {
   font-size: 0.875rem;
   color: #6b7280;
   margin-top: 2px;
@@ -196,32 +230,19 @@ const statusClass = computed(() => {
   color: #111827;
 }
 
-.card--image {
-  align-items: flex-start;
-}
-
-.product-image {
-  width: 100%;
-  max-height: 200px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #f9fafb;
-  padding: 1rem;
-}
-
 .info-list {
-  width: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1rem;
   padding: 8px 0;
   border-bottom: 0.5px solid #f3f4f6;
   font-size: 0.85rem;
+  align-items: start;
 }
 
 .info-row:last-child {
@@ -234,7 +255,6 @@ const statusClass = computed(() => {
 
 .info-value {
   color: #111827;
-  text-align: right;
 }
 
 .stock-red { color: #b91c1c; font-weight: 500; }
@@ -242,16 +262,16 @@ const statusClass = computed(() => {
 
 .pill {
   display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 13px;
+  padding: 4px 12px;
   border-radius: 20px;
 }
 
-.pill-green { background: #f0fdf4; color: #15803d; }
-.pill-amber { background: #fffbeb; color: #b45309; }
-.pill-red   { background: #fef2f2; color: #b91c1c; }
+.pill-green { background: #f0fdf4; color: #15803d; box-shadow: 0 0 0 1.5px #15803d; }
+.pill-amber { background: #fffbeb; color: #b45309; box-shadow: 0 0 0 1.5px #b45309; }
+.pill-red   { background: #fef2f2; color: #b91c1c; box-shadow: 0 0 0 1.5px #b91c1c; }
 
-.tags {
+.tag-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -268,7 +288,6 @@ const statusClass = computed(() => {
 .reviews {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .review {
@@ -319,5 +338,34 @@ const statusClass = computed(() => {
   .row {
     grid-template-columns: 1fr;
   }
+}
+
+.card--description {
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.product-image-large {
+  width: 120px;
+  min-width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f9fafb;
+  padding: 8px;
+  border: 0.5px solid #e5e7eb;
+}
+
+.description-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.description-text {
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.6;
 }
 </style>

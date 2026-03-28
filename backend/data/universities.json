@@ -1,51 +1,345 @@
 {
-  "University of Wisconsin--Madison": {"city": "Madison", "state": "Wisconsin"},
-  "Ohio State University": {"city": "Columbus", "state": "Ohio"},
-  "Pepperdine University": {"city": "Malibu", "state": "California"},
-  "University of Southern California": {"city": "Los Angeles", "state": "California"},
-  "Northeastern University": {"city": "Boston", "state": "Massachusetts"},
-  "University of North Carolina--Chapel Hill": {"city": "Chapel Hill", "state": "North Carolina"},
-  "University of Illinois--Urbana-Champaign": {"city": "Champaign", "state": "Illinois"},
-  "Syracuse University": {"city": "Syracuse", "state": "New York"},
-  "California Institute of Technology (Caltech)": {"city": "Pasadena", "state": "California"},
-  "William & Mary": {"city": "Williamsburg", "state": "Virginia"},
-  "New York University (NYU)": {"city": "New York City", "state": "New York"},
-  "Tufts University": {"city": "Medford", "state": "Massachusetts"},
-  "Harvard University": {"city": "Cambridge", "state": "Massachusetts"},
-  "Washington University in St. Louis": {"city": "St. Louis", "state": "Missouri"},
-  "University of Pennsylvania": {"city": "Philadelphia", "state": "Pennsylvania"},
-  "Georgetown University": {"city": "Washington", "state": "District of Columbia"},
-  "Columbia University": {"city": "New York City", "state": "New York"},
-  "Boston College": {"city": "Chestnut Hill", "state": "Massachusetts"},
-  "Johns Hopkins University": {"city": "Baltimore", "state": "Maryland"},
-  "Massachusetts Institute of Technology (MIT)": {"city": "Cambridge", "state": "Massachusetts"},
-  "Boston University": {"city": "Boston", "state": "Massachusetts"},
-  "Yale University": {"city": "New Haven", "state": "Connecticut"},
-  "Princeton University": {"city": "Princeton", "state": "New Jersey"},
-  "University of California--Irvine": {"city": "Irvine", "state": "California"},
-  "University of Michigan--Ann Arbor": {"city": "Ann Arbor", "state": "Michigan"},
-  "University of Florida": {"city": "Gainesville", "state": "Florida"},
-  "University of California--Los Angeles (UCLA)": {"city": "Los Angeles", "state": "California"},
-  "University of California--San Diego": {"city": "La Jolla", "state": "California"},
-  "University of Rochester": {"city": "Rochester", "state": "New York"},
-  "Vanderbilt University": {"city": "Nashville", "state": "Tennessee"},
-  "Cornell University": {"city": "Ithaca", "state": "New York"},
-  "University of Chicago": {"city": "Chicago", "state": "Illinois"},
-  "Wake Forest University": {"city": "Winston-Salem", "state": "North Carolina"},
-  "University of Virginia": {"city": "Charlottesville", "state": "Virginia"},
-  "University of Notre Dame": {"city": "Notre Dame", "state": "Indiana"},
-  "University of Miami": {"city": "Coral Gables", "state": "Florida"},
-  "Carnegie Mellon University": {"city": "Pittsburgh", "state": "Pennsylvania"},
-  "Emory University": {"city": "Atlanta", "state": "Georgia"},
-  "Duke University": {"city": "Durham", "state": "North Carolina"},
-  "Brown University": {"city": "Providence", "state": "Rhode Island"},
-  "University of Texas--Austin": {"city": "Austin", "state": "Texas"},
-  "Rice University": {"city": "Houston", "state": "Texas"},
-  "University of California--Santa Barbara": {"city": "Santa Barbara", "state": "California"},
-  "University of Connecticut": {"city": "Storrs", "state": "Connecticut"},
-  "University of California--Berkeley": {"city": "Berkeley", "state": "California"},
-  "Northwestern University": {"city": "Evanston", "state": "Illinois"},
-  "Stanford University": {"city": "Stanford", "state": "California"},
-  "Purdue University": {"city": "West Lafayette", "state": "Indiana"},
-  "Dartmouth College": {"city": "Hanover", "state": "New Hampshire"}
+  "University of Wisconsin--Madison": {
+    "city": "Madison",
+    "state": "Wisconsin",
+    "address": "500 Lincoln Dr",
+    "country": "United States",
+    "postalCode": "53706"
+  },
+  "Ohio State University": {
+    "city": "Columbus",
+    "state": "Ohio",
+    "address": "281 W Lane Ave",
+    "country": "United States",
+    "postalCode": "43210"
+  },
+  "Pepperdine University": {
+    "city": "Malibu",
+    "state": "California",
+    "address": "24255 Pacific Coast Hwy",
+    "country": "United States",
+    "postalCode": "90263"
+  },
+  "University of Southern California": {
+    "city": "Los Angeles",
+    "state": "California",
+    "address": "University Park",
+    "country": "United States",
+    "postalCode": "90089"
+  },
+  "Northeastern University": {
+    "city": "Boston",
+    "state": "Massachusetts",
+    "address": "360 Huntington Ave",
+    "country": "United States",
+    "postalCode": "02115"
+  },
+  "University of North Carolina--Chapel Hill": {
+    "city": "Chapel Hill",
+    "state": "North Carolina",
+    "address": "399 Ridge Rd",
+    "country": "United States",
+    "postalCode": "27599"
+  },
+  "University of Illinois--Urbana-Champaign": {
+    "city": "Champaign",
+    "state": "Illinois",
+    "address": "601 E John St",
+    "country": "United States",
+    "postalCode": "61820"
+  },
+  "Syracuse University": {
+    "city": "Syracuse",
+    "state": "New York",
+    "address": "900 S Crouse Ave",
+    "country": "United States",
+    "postalCode": "13244"
+  },
+  "California Institute of Technology (Caltech)": {
+    "city": "Pasadena",
+    "state": "California",
+    "address": "1200 E California Blvd",
+    "country": "United States",
+    "postalCode": "91125"
+  },
+  "William & Mary": {
+    "city": "Williamsburg",
+    "state": "Virginia",
+    "address": "Confusion Corner",
+    "country": "United States",
+    "postalCode": "23185"
+  },
+  "New York University (NYU)": {
+    "city": "New York City",
+    "state": "New York",
+    "address": "70 Washington Square S",
+    "country": "United States",
+    "postalCode": "10012"
+  },
+  "Tufts University": {
+    "city": "Medford",
+    "state": "Massachusetts",
+    "address": "419 Boston Ave",
+    "country": "United States",
+    "postalCode": "02155"
+  },
+  "Harvard University": {
+    "city": "Cambridge",
+    "state": "Massachusetts",
+    "address": "Massachusetts Hall",
+    "country": "United States",
+    "postalCode": "02138"
+  },
+  "Washington University in St. Louis": {
+    "city": "St. Louis",
+    "state": "Missouri",
+    "address": "1 Brookings Dr",
+    "country": "United States",
+    "postalCode": "63130"
+  },
+  "University of Pennsylvania": {
+    "city": "Philadelphia",
+    "state": "Pennsylvania",
+    "address": "1 College Hall",
+    "country": "United States",
+    "postalCode": "19104"
+  },
+  "Georgetown University": {
+    "city": "Washington",
+    "state": "District of Columbia",
+    "address": "37th and O Streets NW",
+    "country": "United States",
+    "postalCode": "20057"
+  },
+  "Columbia University": {
+    "city": "New York City",
+    "state": "New York",
+    "address": "116th St & Broadway",
+    "country": "United States",
+    "postalCode": "10027"
+  },
+  "Boston College": {
+    "city": "Chestnut Hill",
+    "state": "Massachusetts",
+    "address": "140 Commonwealth Ave",
+    "country": "United States",
+    "postalCode": "02467"
+  },
+  "Johns Hopkins University": {
+    "city": "Baltimore",
+    "state": "Maryland",
+    "address": "3400 N Charles St",
+    "country": "United States",
+    "postalCode": "21218"
+  },
+  "Massachusetts Institute of Technology (MIT)": {
+    "city": "Cambridge",
+    "state": "Massachusetts",
+    "address": "77 Massachusetts Ave",
+    "country": "United States",
+    "postalCode": "02139"
+  },
+  "Boston University": {
+    "city": "Boston",
+    "state": "Massachusetts",
+    "address": "1 Silber Way",
+    "country": "United States",
+    "postalCode": "02215"
+  },
+  "Yale University": {
+    "city": "New Haven",
+    "state": "Connecticut",
+    "address": "38 Hillhouse Ave",
+    "country": "United States",
+    "postalCode": "06511"
+  },
+  "Princeton University": {
+    "city": "Princeton",
+    "state": "New Jersey",
+    "address": "1 Nassau Hall",
+    "country": "United States",
+    "postalCode": "08544"
+  },
+  "University of California--Irvine": {
+    "city": "Irvine",
+    "state": "California",
+    "address": "260 Aldrich Hall",
+    "country": "United States",
+    "postalCode": "92697"
+  },
+  "University of Michigan--Ann Arbor": {
+    "city": "Ann Arbor",
+    "state": "Michigan",
+    "address": "500 S State St",
+    "country": "United States",
+    "postalCode": "48109"
+  },
+  "University of Florida": {
+    "city": "Gainesville",
+    "state": "Florida",
+    "address": "226 Tigert Hall",
+    "country": "United States",
+    "postalCode": "32611"
+  },
+  "University of California--Los Angeles (UCLA)": {
+    "city": "Los Angeles",
+    "state": "California",
+    "address": "405 Hilgard Ave",
+    "country": "United States",
+    "postalCode": "90095"
+  },
+  "University of California--San Diego": {
+    "city": "La Jolla",
+    "state": "California",
+    "address": "9500 Gilman Dr",
+    "country": "United States",
+    "postalCode": "92093"
+  },
+  "University of Rochester": {
+    "city": "Rochester",
+    "state": "New York",
+    "address": "500 Joseph C Wilson Blvd",
+    "country": "United States",
+    "postalCode": "14627"
+  },
+  "Vanderbilt University": {
+    "city": "Nashville",
+    "state": "Tennessee",
+    "address": "2201 West End Ave",
+    "country": "United States",
+    "postalCode": "37235"
+  },
+  "Cornell University": {
+    "city": "Ithaca",
+    "state": "New York",
+    "address": "Day Hall",
+    "country": "United States",
+    "postalCode": "14853"
+  },
+  "University of Chicago": {
+    "city": "Chicago",
+    "state": "Illinois",
+    "address": "5801 S Ellis Ave",
+    "country": "United States",
+    "postalCode": "60637"
+  },
+  "Wake Forest University": {
+    "city": "Winston-Salem",
+    "state": "North Carolina",
+    "address": "1834 Wake Forest Rd",
+    "country": "United States",
+    "postalCode": "27106"
+  },
+  "University of Virginia": {
+    "city": "Charlottesville",
+    "state": "Virginia",
+    "address": "1827 University Ave",
+    "country": "United States",
+    "postalCode": "22904"
+  },
+  "University of Notre Dame": {
+    "city": "Notre Dame",
+    "state": "Indiana",
+    "address": "Notre Dame Ave",
+    "country": "United States",
+    "postalCode": "46556"
+  },
+  "University of Miami": {
+    "city": "Coral Gables",
+    "state": "Florida",
+    "address": "1301 Memorial Dr",
+    "country": "United States",
+    "postalCode": "33146"
+  },
+  "Carnegie Mellon University": {
+    "city": "Pittsburgh",
+    "state": "Pennsylvania",
+    "address": "5000 Forbes Ave",
+    "country": "United States",
+    "postalCode": "15213"
+  },
+  "Emory University": {
+    "city": "Atlanta",
+    "state": "Georgia",
+    "address": "201 Dowman Dr",
+    "country": "United States",
+    "postalCode": "30322"
+  },
+  "Duke University": {
+    "city": "Durham",
+    "state": "North Carolina",
+    "address": "2127 Campus Dr",
+    "country": "United States",
+    "postalCode": "27708"
+  },
+  "Brown University": {
+    "city": "Providence",
+    "state": "Rhode Island",
+    "address": "1 Prospect St",
+    "country": "United States",
+    "postalCode": "02912"
+  },
+  "University of Texas--Austin": {
+    "city": "Austin",
+    "state": "Texas",
+    "address": "110 Inner Campus Dr",
+    "country": "United States",
+    "postalCode": "78712"
+  },
+  "Rice University": {
+    "city": "Houston",
+    "state": "Texas",
+    "address": "6100 Main St",
+    "country": "United States",
+    "postalCode": "77005"
+  },
+  "University of California--Santa Barbara": {
+    "city": "Santa Barbara",
+    "state": "California",
+    "address": "552 University Rd",
+    "country": "United States",
+    "postalCode": "93106"
+  },
+  "University of Connecticut": {
+    "city": "Storrs",
+    "state": "Connecticut",
+    "address": "9 Walters Ave",
+    "country": "United States",
+    "postalCode": "06269"
+  },
+  "University of California--Berkeley": {
+    "city": "Berkeley",
+    "state": "California",
+    "address": "200 California Hall",
+    "country": "United States",
+    "postalCode": "94720"
+  },
+  "Northwestern University": {
+    "city": "Evanston",
+    "state": "Illinois",
+    "address": "633 Clark St",
+    "country": "United States",
+    "postalCode": "60208"
+  },
+  "Stanford University": {
+    "city": "Stanford",
+    "state": "California",
+    "address": "450 Serra Mall",
+    "country": "United States",
+    "postalCode": "94305"
+  },
+  "Purdue University": {
+    "city": "West Lafayette",
+    "state": "Indiana",
+    "address": "610 Purdue Mall",
+    "country": "United States",
+    "postalCode": "47907"
+  },
+  "Dartmouth College": {
+    "city": "Hanover",
+    "state": "New Hampshire",
+    "address": "Parkhurst Hall",
+    "country": "United States",
+    "postalCode": "03755"
+  }
 }

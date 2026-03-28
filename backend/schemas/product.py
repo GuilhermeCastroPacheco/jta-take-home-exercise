@@ -7,18 +7,29 @@ class ReviewSchema(BaseModel):
     reviewerName: str
     reviewerEmail: str
 
+class DimensionsSchema(BaseModel):
+    width: float
+    height: float
+    depth: float
+
 class ProductSchema(BaseModel):
     id: int
     title: str
+    description: str
     category: str
     price: float
     discountPercentage: float
     rating: float
     stock: int
     brand: Optional[str] = None
+    sku: str
     availabilityStatus: str
     minimumOrderQuantity: int
     thumbnail: str
     tags: List[str]
     reviews: List[ReviewSchema]
     returnPolicy: str
+    warrantyInformation: str
+    shippingInformation: str
+    weight: float
+    dimensions: DimensionsSchema

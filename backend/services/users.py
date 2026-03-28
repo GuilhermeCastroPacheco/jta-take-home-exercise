@@ -96,9 +96,74 @@ async def get_users_summary() -> dict:
     }
 
 async def get_user_detail(user_id: int) -> dict:
+    users_raw = await fetch_users()
+    products_raw = await fetch_products()
+
     raw = await fetch_user(user_id)
     user = UserSchema(**raw)
-    return user.model_dump()
+
+    products = [ProductSchema(**p) for p in products_raw["products"]]
+
+    # Reviews do utilizador
+    user_reviews = []
+    for product in products:
+        for review in product.reviews:
+            if review.reviewerEmail.lower() == user.email.lower():
+                user_reviews.append({
+                    "productId": product.id,
+                    "productTitle": product.title,
+                    "productThumbnail": product.thumbnail,
+                    "productCategory": product.category,
+                    "productBrand": product.brand or "No brand",
+                    "productTags": product.tags,
+                    "rating": review.rating,
+                    "comment": review.comment,
+                })
+
+    # Reviews summary
+    reviews_summary = {}
+    if user_reviews:
+        ratings = [r["rating"] for r in user_reviews]
+        
+        by_category = {}
+        by_tags = {}
+        by_product = {}
+        
+        for r in user_reviews:
+            # by category
+            cat = r["productCategory"]
+            by_category[cat] = by_category.get(cat, 0) + 1
+            
+            # by tags
+            for tag in r["productTags"]:
+                by_tags[tag] = by_tags.get(tag, 0) + 1
+            
+            # by product
+            by_product[r["productTitle"]] = by_product.get(r["productTitle"], 0) + 1
+
+        reviews_summary = {
+            "total": len(user_reviews),
+            "avg_rating": round(sum(ratings) / len(ratings), 2),
+            "min_rating": min(ratings),
+            "max_rating": max(ratings),
+            "by_category": by_category,
+            "by_tags": by_tags,
+            "by_product": by_product,
+            "by_rating": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        }
+        for r in user_reviews:
+            reviews_summary["by_rating"][r["rating"]] += 1
+
+    # University data
+    universities = get_universities()
+    university_data = universities.get(user.university, {})
+
+    return {
+        **user.model_dump(),
+        "university_data": university_data,
+        "reviews": user_reviews,
+        "reviews_summary": reviews_summary
+    }
 
 async def get_users_insights() -> dict:
     users_raw = await fetch_users()
