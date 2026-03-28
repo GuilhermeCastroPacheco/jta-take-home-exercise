@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://jta-backend.onrender.com'
+  baseURL: 'https://jta-take-home-exercise.onrender.com/'
 })
 
 export const getUsersSummary = () => api.get('/users/summary')
