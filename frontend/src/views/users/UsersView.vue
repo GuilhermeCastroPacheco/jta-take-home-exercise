@@ -83,11 +83,14 @@ const highRatingPct = computed(() => {
 })
 
 const userColumns = [
-  { field: 'firstName', header: 'First name' },
-  { field: 'lastName', header: 'Last name' },
-  { field: 'email', header: 'Email' },
-  { field: 'role', header: 'Role' },
-  { field: 'company', header: 'Company' }
+  { field: 'image', header: '', type: 'image' },
+  { field: 'firstName', header: 'Name', formatter: (row) => `${row.firstName} ${row.lastName}` },
+  { field: 'email', header: 'Email', muted: true },
+  { field: 'gender', header: 'Gender', formatter: (row) => row.gender === 'male' ? 'M' : 'F' },
+  { field: 'age', header: 'Age', muted: true },
+  { field: 'address', header: 'Location', formatter: (row) => `${row.address.city}, ${row.address.state}` },
+  { field: 'role', header: 'Role', muted: true }
+  //{ field: 'company', header: 'Job title', formatter: (row) => `${row.company.title}`, muted: true }
 ]
 </script>
 
@@ -173,4 +176,5 @@ const userColumns = [
     grid-template-columns: 1fr;
   }
 }
+
 </style>

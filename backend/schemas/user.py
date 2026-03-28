@@ -24,3 +24,4 @@ class UserSchema(BaseModel):
     university: str
     address: AddressSchema
     company: CompanySchema
+    image: str

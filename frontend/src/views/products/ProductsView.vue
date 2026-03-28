@@ -20,12 +20,6 @@
           badgeType="green"
         />
         <StatCard
-          label="Avg. price"
-          :value="`$${productsSummary.avg_price}`"
-          badge="Per product"
-          badgeType="green"
-        />
-        <StatCard
           label="Avg. rating"
           :value="productsSummary.avg_rating"
           badge="Out of 5"
@@ -39,27 +33,18 @@
         />
       </div>
 
-      <!-- Gráficos por categoria -->
+      <!-- Chart1 e Chart2 -->
       <div class="row">
         <div class="card">
-          <h3>Products by category</h3>
-          <Bar :data="categoryCountData" :options="horizontalBarOptions" />
+          <h3>Product aggregation</h3>
+          <ProductAggregationTable :aggregationData="productsAggregation" />
         </div>
         <div class="card">
-          <h3>Avg. price by category</h3>
-          <Bar :data="categoryPriceData" :options="horizontalBarOptions" />
-        </div>
-      </div>
-
-      <!-- Insights -->
-      <div class="row">
-        <div class="card">
-          <h3>Price vs. rating</h3>
-          <Scatter :data="priceVsRatingData" :options="scatterOptions" />
-        </div>
-        <div class="card">
-          <h3>Availability distribution</h3>
-          <Doughnut :data="availabilityData" :options="doughnutOptions" />
+          <h3>Top / bottom products</h3>
+          <ProductTopBarChart
+            :products="products"
+            :filterOptions="productsAggregation.filter_options"
+          />
         </div>
       </div>
 
@@ -77,102 +62,22 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { Bar, Doughnut, Scatter } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js'
-
 import StatCard from '../../components/StatCard.vue'
 import DataTable from '../../components/DataTable.vue'
+import ProductAggregationTable from '../../components/tables/ProductAggregationTable.vue'
+import ProductTopBarChart from '../../components/charts/ProductTopBarChart.vue'
 import { useProducts } from '../../composables/useProducts'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, ArcElement, Tooltip, Legend)
-
-const { productsSummary, insights, loading, error } = useProducts()
-
-const categoryCountData = computed(() => ({
-  labels: (productsSummary.value?.by_category || []).map(c => c.category),
-  datasets: [{
-    label: 'Products',
-    data: (productsSummary.value?.by_category || []).map(c => c.count),
-    backgroundColor: '#378ADD',
-    borderRadius: 6
-  }]
-}))
-
-const categoryPriceData = computed(() => ({
-  labels: (productsSummary.value?.by_category || []).map(c => c.category),
-  datasets: [{
-    label: 'Avg. price ($)',
-    data: (productsSummary.value?.by_category || []).map(c => c.avg_price),
-    backgroundColor: '#639922',
-    borderRadius: 6
-  }]
-}))
-
-const priceVsRatingData = computed(() => ({
-  datasets: [{
-    label: 'Products',
-    data: (insights.value?.price_vs_rating || []).map(p => ({ x: p.price, y: p.rating })),
-    backgroundColor: '#378ADD'
-  }]
-}))
-
-const availabilityData = computed(() => ({
-  labels: Object.keys(productsSummary.value?.availability_distribution || {}),
-  datasets: [{
-    data: Object.values(productsSummary.value?.availability_distribution || {}),
-    backgroundColor: ['#639922', '#BA7517', '#E24B4A']
-  }]
-}))
-
-const barOptions = {
-  responsive: true,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-    x: { grid: { display: false } }
-  }
-}
-
-const horizontalBarOptions = {
-  responsive: true,
-  indexAxis: 'y',
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-    y: { grid: { display: false } }
-  }
-}
-
-const scatterOptions = {
-  responsive: true,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { title: { display: true, text: 'Price ($)' }, grid: { color: '#f3f4f6' } },
-    y: { title: { display: true, text: 'Rating' }, min: 0, max: 5, grid: { color: '#f3f4f6' } }
-  }
-}
-
-const doughnutOptions = {
-  responsive: true,
-  plugins: { legend: { position: 'bottom' } }
-}
+const { productsSummary, products, productsAggregation, loading, error } = useProducts()
 
 const productColumns = [
+  { field: 'thumbnail', header: '', type: 'image' },
   { field: 'title', header: 'Product' },
-  { field: 'category', header: 'Category' },
-  { field: 'price', header: 'Price', prefix: '$' },
+  { field: 'category', header: 'Category', muted: true },
+  { field: 'brand', header: 'Brand', formatter: (row) => row.brand || '—' },
+  { field: 'price', header: 'Price', muted: true, prefix: '$' },
   { field: 'rating', header: 'Rating' },
-  { field: 'availabilityStatus', header: 'Status' }
+  { field: 'availabilityStatus', header: 'Status', muted: true }
 ]
 </script>
 
@@ -197,7 +102,7 @@ const productColumns = [
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 

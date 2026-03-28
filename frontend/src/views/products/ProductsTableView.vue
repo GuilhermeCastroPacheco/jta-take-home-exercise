@@ -16,55 +16,16 @@
 
     <template v-else>
       <div class="card">
-        <div class="card-header">
-          <span class="total">{{ filteredProducts.length }} products</span>
-          <div class="filters">
-            <select v-model="selectedCategory" class="select-input">
-              <option value="">All categories</option>
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-            </select>
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Search by name or brand..."
-              class="search-input"
-            />
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Brand</th>
-              <th>Price</th>
-              <th>Rating</th>
-              <th>Stock</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="product in filteredProducts" :key="product.id">
-              <td>{{ product.title }}</td>
-              <td class="muted">{{ product.category }}</td>
-              <td class="muted">{{ product.brand || '—' }}</td>
-              <td>${{ product.price }}</td>
-              <td>{{ product.rating }}</td>
-              <td :class="stockClass(product)">{{ product.stock }}</td>
-              <td>
-                <span class="pill" :class="statusClass(product.availabilityStatus)">
-                  {{ product.availabilityStatus }}
-                </span>
-              </td>
-              <td>
-                <RouterLink :to="`/products/${product.id}`" class="detail-link">
-                  View <i class="pi pi-arrow-right" />
-                </RouterLink>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <DataTableFull
+          :columns="productColumns"
+          :data="products"
+          :filters="productFilters"
+          :sortOptions="sortOptions"
+          :searchFields="searchFields"
+          searchPlaceholder="Search by title..."
+          detailRoute="/products"
+          :pageSize="10"
+        />
       </div>
     </template>
 
@@ -72,42 +33,55 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import DataTableFull from '../../components/DataTableFull.vue'
 import { useProducts } from '../../composables/useProducts'
 
 const { products, loading, error } = useProducts()
 
-const search = ref('')
-const selectedCategory = ref('')
+const productColumns = [
+  { field: 'thumbnail', header: '', type: 'image' },
+  { field: 'title', header: 'Product' },
+  { field: 'category', header: 'Category', muted: true },
+  { field: 'brand', header: 'Brand', formatter: (row) => row.brand || '—' },
+  { field: 'price', header: 'Price', muted: true, prefix: '$' },
+  { field: 'rating', header: 'Rating' },
+  //{ field: 'stock', header: 'Stock', muted: true, formatter: (row) => row.stock },
+  { field: 'stock', header: 'Stock', muted: true, type: 'stock' },
+  { field: 'availabilityStatus', header: 'Status' }
+]
 
-const categories = computed(() => {
-  const cats = products.value.map(p => p.category)
-  return [...new Set(cats)].sort()
+const productFilters = computed(() => {
+  if (!products.value?.length) return []
+
+  const unique = (fn) => [...new Set(products.value.map(fn).filter(Boolean))].sort()
+
+  return [
+    {
+      field: 'category',
+      label: 'Category',
+      options: unique(p => p.category)
+    },
+    {
+      field: 'brand',
+      label: 'Brand',
+      options: unique(p => p.brand)
+    },
+    {
+      field: 'availabilityStatus',
+      label: 'Status',
+      options: unique(p => p.availabilityStatus)
+    }
+  ]
 })
 
-const filteredProducts = computed(() => {
-  return products.value.filter(p => {
-    const matchesSearch = !search.value ||
-      p.title.toLowerCase().includes(search.value.toLowerCase()) ||
-      (p.brand || '').toLowerCase().includes(search.value.toLowerCase())
-    const matchesCategory = !selectedCategory.value || p.category === selectedCategory.value
-    return matchesSearch && matchesCategory
-  })
-})
+const sortOptions = [
+  { field: 'price', label: 'Price', getValue: (row) => row.price },
+  { field: 'rating', label: 'Rating', getValue: (row) => row.rating },
+  { field: 'stock', label: 'Stock', getValue: (row) => row.stock }
+]
 
-const statusClass = (status) => {
-  if (!status) return ''
-  const s = status.toLowerCase()
-  if (s.includes('low')) return 'pill-amber'
-  if (s.includes('out')) return 'pill-red'
-  return 'pill-green'
-}
-
-const stockClass = (product) => {
-  if (product.stock < product.minimumOrderQuantity) return 'stock-red'
-  if (product.stock < product.minimumOrderQuantity * 2) return 'stock-amber'
-  return ''
-}
+const searchFields = ['title']
 </script>
 
 <style scoped>
@@ -153,127 +127,15 @@ const stockClass = (product) => {
   border: 0.5px solid #e5e7eb;
   border-radius: 12px;
   padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow-x: auto;
 }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.total {
-  font-size: 0.85rem;
+.loading {
   color: #6b7280;
-  white-space: nowrap;
+  font-size: 0.9rem;
 }
 
-.filters {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.search-input,
-.select-input {
-  padding: 0.5rem 0.75rem;
-  border: 0.5px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-family: inherit;
-  color: #111827;
-  outline: none;
-  background: #ffffff;
-}
-
-.search-input {
-  width: 240px;
-}
-
-.search-input:focus,
-.select-input:focus {
-  border-color: #378ADD;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-
-th {
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #6b7280;
-  padding: 0 0 8px 0;
-  border-bottom: 0.5px solid #e5e7eb;
-}
-
-td {
-  padding: 10px 0;
-  color: #111827;
-  border-bottom: 0.5px solid #f3f4f6;
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-td.muted {
-  color: #6b7280;
-}
-
-td.stock-red {
+.error {
   color: #b91c1c;
-  font-weight: 500;
-}
-
-td.stock-amber {
-  color: #b45309;
-  font-weight: 500;
-}
-
-.pill {
-  display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 20px;
-}
-
-.pill-green { background: #f0fdf4; color: #15803d; }
-.pill-amber { background: #fffbeb; color: #b45309; }
-.pill-red   { background: #fef2f2; color: #b91c1c; }
-
-.detail-link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-  color: #1d4ed8;
-  text-decoration: none;
-  justify-content: flex-end;
-}
-
-.detail-link:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .filters {
-    flex-direction: column;
-  }
-
-  .search-input {
-    width: 100%;
-  }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  font-size: 0.9rem;
 }
 </style>

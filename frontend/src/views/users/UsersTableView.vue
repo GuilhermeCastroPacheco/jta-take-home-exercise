@@ -16,41 +16,16 @@
 
     <template v-else>
       <div class="card">
-        <div class="card-header">
-          <span class="total">{{ filteredUsers.length }} users</span>
-          <input
-            v-model="search"
-            type="text"
-            placeholder="Search by name, email or role..."
-            class="search-input"
-          />
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Company</th>
-              <th>Department</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in filteredUsers" :key="user.id">
-              <td>{{ user.firstName }} {{ user.lastName }}</td>
-              <td class="muted">{{ user.email }}</td>
-              <td><span class="pill pill-blue">{{ user.role }}</span></td>
-              <td>{{ user.company?.name }}</td>
-              <td class="muted">{{ user.company?.department }}</td>
-              <td>
-                <RouterLink :to="`/users/${user.id}`" class="detail-link">
-                  View <i class="pi pi-arrow-right" />
-                </RouterLink>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <DataTableFull
+          :columns="userColumns"
+          :data="users"
+          :filters="userFilters"
+          :sortOptions="sortOptions"
+          :searchFields="searchFields"
+          searchPlaceholder="Search by name, email or job title..."
+          detailRoute="/users"
+          :pageSize="10"
+        />
       </div>
     </template>
 
@@ -58,22 +33,76 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import DataTableFull from '../../components/DataTableFull.vue'
 import { useUsers } from '../../composables/useUsers'
 
 const { users, loading, error } = useUsers()
 
-const search = ref('')
+const userColumns = [
+  { field: 'image', header: '', type: 'image' },
+  { field: 'firstName', header: 'Name', formatter: (row) => `${row.firstName} ${row.lastName}` },
+  { field: 'email', header: 'Email', muted: true },
+  { field: 'gender', header: 'Gender', formatter: (row) => row.gender === 'male' ? 'M' : 'F' },
+  { field: 'age', header: 'Age', muted: true },
+  { field: 'address', header: 'Location', formatter: (row) => `${row.address.city}, ${row.address.state}` },
+  { field: 'company', header: 'Job title', formatter: (row) => row.company.title, muted: true},
+  { field: 'role', header: 'Role' }
+]
 
-const filteredUsers = computed(() => {
-  if (!search.value) return users.value
-  const q = search.value.toLowerCase()
-  return users.value.filter(u =>
-    `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
-    u.email.toLowerCase().includes(q) ||
-    u.role.toLowerCase().includes(q)
-  )
+const userFilters = computed(() => {
+  if (!users.value?.length) return []
+
+  const unique = (fn) => [...new Set(users.value.map(fn))].sort()
+
+  return [
+    {
+      field: 'role',
+      label: 'Role',
+      options: unique(u => u.role)
+    },
+    {
+      field: 'gender',
+      label: 'Gender',
+      options: unique(u => u.gender)
+    },
+    {
+      field: 'state',
+      label: 'State',
+      options: unique(u => u.address.state),
+      getValue: (row) => row.address.state
+    },
+    {
+      field: 'city',
+      label: 'City',
+      options: unique(u => u.address.city),
+      getValue: (row) => row.address.city
+    },
+    {
+      field: 'age_range',
+      label: 'Age range',
+      options: ['18-25', '26-30', '31-35', '36-40', '40+'],
+      getValue: (row) => {
+        if (row.age <= 25) return '18-25'
+        if (row.age <= 30) return '26-30'
+        if (row.age <= 35) return '31-35'
+        if (row.age <= 40) return '36-40'
+        return '40+'
+      }
+    }
+  ]
 })
+
+const sortOptions = [
+  { field: 'name', label: 'Name', getValue: (row) => `${row.firstName} ${row.lastName}` },
+  { field: 'age', label: 'Age', getValue: (row) => row.age }
+]
+
+const searchFields = [
+  (row) => `${row.firstName} ${row.lastName}`,
+  'email',
+  (row) => row.company.title
+]
 </script>
 
 <style scoped>
@@ -119,103 +148,15 @@ const filteredUsers = computed(() => {
   border: 0.5px solid #e5e7eb;
   border-radius: 12px;
   padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow-x: auto;
 }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.total {
-  font-size: 0.85rem;
+.loading {
   color: #6b7280;
-  white-space: nowrap;
+  font-size: 0.9rem;
 }
 
-.search-input {
-  padding: 0.5rem 0.75rem;
-  border: 0.5px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-family: inherit;
-  color: #111827;
-  outline: none;
-  width: 280px;
-}
-
-.search-input:focus {
-  border-color: #378ADD;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-
-th {
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #6b7280;
-  padding: 0 0 8px 0;
-  border-bottom: 0.5px solid #e5e7eb;
-}
-
-td {
-  padding: 10px 0;
-  color: #111827;
-  border-bottom: 0.5px solid #f3f4f6;
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-td.muted {
-  color: #6b7280;
-}
-
-.pill {
-  display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 20px;
-}
-
-.pill-blue {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.detail-link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-  color: #1d4ed8;
-  text-decoration: none;
-  justify-content: flex-end;
-}
-
-.detail-link:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .search-input {
-    width: 100%;
-  }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.error {
+  color: #b91c1c;
+  font-size: 0.9rem;
 }
 </style>

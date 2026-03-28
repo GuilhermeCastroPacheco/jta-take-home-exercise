@@ -1,23 +1,26 @@
 import { ref, onMounted } from 'vue'
-import { getProductsSummary, getProducts, getProductsInsights } from '../services/api'
+import { getProductsSummary, getProducts, getProductsInsights, getProductsAggregation } from '../services/api'
 
 export function useProducts() {
   const productsSummary = ref(null)
   const products = ref([])
   const insights = ref(null)
+  const productsAggregation = ref(null)
   const loading = ref(true)
   const error = ref(null)
 
   onMounted(async () => {
     try {
-      const [summaryRes, productsRes, insightsRes] = await Promise.all([
+      const [summaryRes, productsRes, insightsRes, aggregationRes] = await Promise.all([
         getProductsSummary(),
         getProducts(),
-        getProductsInsights()
+        getProductsInsights(),
+        getProductsAggregation()
       ])
       productsSummary.value = summaryRes.data
       products.value = productsRes.data
       insights.value = insightsRes.data
+      productsAggregation.value = aggregationRes.data
     } catch (e) {
       error.value = 'Failed to load products data'
     } finally {
@@ -25,5 +28,5 @@ export function useProducts() {
     }
   })
 
-  return { productsSummary, products, insights, loading, error }
+  return { productsSummary, products, insights, productsAggregation, loading, error }
 }

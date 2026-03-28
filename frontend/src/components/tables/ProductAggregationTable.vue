@@ -3,22 +3,25 @@
 
     <div class="controls">
       <div class="control-group">
-        <label>Filter by</label>
-        <select v-model="filterType">
-          <option value="overall">Overall</option>
-          <option value="category">Category</option>
-          <option value="brand">Brand</option>
-          <option value="tag">Tag</option>
-        </select>
-      </div>
-      <div class="control-group" v-if="filterType !== 'overall'">
-        <label>{{ filterTypeLabel }}</label>
-        <select v-model="filterValue">
+        <label>Category</label>
+        <select v-model="selectedCategory">
           <option value="">All</option>
-          <option v-for="opt in currentOptions" :key="opt" :value="opt">{{ opt }}</option>
+          <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
       </div>
+      <div class="control-group">
+        <label>Brand</label>
+        <select v-model="selectedBrand">
+          <option value="">All</option>
+          <option v-for="brand in availableBrands" :key="brand" :value="brand">{{ brand }}</option>
+        </select>
+      </div>
+      <button v-if="isFiltered" class="clear-btn" @click="clearFilters">
+        Clear filters
+      </button>
     </div>
+
+    <p class="count-info">{{ aggregated.count }} product{{ aggregated.count !== 1 ? 's' : '' }}</p>
 
     <table>
       <thead>
@@ -30,12 +33,6 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="metric-label">Count</td>
-          <td>{{ aggregated.count }}</td>
-          <td>{{ aggregated.count }}</td>
-          <td>{{ aggregated.count }}</td>
-        </tr>
         <tr>
           <td class="metric-label">Min</td>
           <td>${{ aggregated.price?.min }}</td>
@@ -54,6 +51,18 @@
           <td>{{ aggregated.stock?.avg }}</td>
           <td>{{ aggregated.rating?.avg }}</td>
         </tr>
+        <tr>
+          <td class="metric-label">Median</td>
+          <td>${{ aggregated.price?.median }}</td>
+          <td>{{ aggregated.stock?.median }}</td>
+          <td>{{ aggregated.rating?.median }}</td>
+        </tr>
+        <tr>
+          <td class="metric-label">Total</td>
+          <td>${{ aggregated.price?.total }}</td>
+          <td>{{ aggregated.stock?.total }}</td>
+          <td class="muted">—</td>
+        </tr>
       </tbody>
     </table>
 
@@ -61,43 +70,62 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   aggregationData: Object
 })
 
-const filterType = ref('overall')
-const filterValue = ref('')
+const selectedCategory = ref('')
+const selectedBrand = ref('')
 
-const filterTypeLabel = computed(() => {
-  if (filterType.value === 'category') return 'Category'
-  if (filterType.value === 'brand') return 'Brand'
-  if (filterType.value === 'tag') return 'Tag'
-  return ''
-})
+const isFiltered = computed(() => !!selectedCategory.value || !!selectedBrand.value)
 
-const currentOptions = computed(() => {
+const availableBrands = computed(() => {
   if (!props.aggregationData) return []
-  if (filterType.value === 'category') return props.aggregationData.filter_options.categories
-  if (filterType.value === 'brand') return props.aggregationData.filter_options.brands
-  if (filterType.value === 'tag') return props.aggregationData.filter_options.tags
-  return []
+  if (selectedCategory.value) {
+    return Object.keys(props.aggregationData.by_category_brand?.[selectedCategory.value] || {})
+  }
+  return props.aggregationData.filter_options.brands
 })
+
+const availableCategories = computed(() => {
+  if (!props.aggregationData) return []
+  if (selectedBrand.value) {
+    return props.aggregationData.filter_options.categories.filter(cat =>
+      props.aggregationData.by_category_brand?.[cat]?.[selectedBrand.value] !== undefined
+    )
+  }
+  return props.aggregationData.filter_options.categories
+})
+
+// Reset brand se já não estiver disponível após mudar categoria
+watch(selectedCategory, () => {
+  if (selectedBrand.value && !availableBrands.value.includes(selectedBrand.value)) {
+    selectedBrand.value = ''
+  }
+})
+
+// Reset category se já não estiver disponível após mudar brand
+watch(selectedBrand, () => {
+  if (selectedCategory.value && !availableCategories.value.includes(selectedCategory.value)) {
+    selectedCategory.value = ''
+  }
+})
+
+const clearFilters = () => {
+  selectedCategory.value = ''
+  selectedBrand.value = ''
+}
 
 const aggregated = computed(() => {
   if (!props.aggregationData) return {}
-  if (filterType.value === 'overall') return props.aggregationData.overall
-
-  const map = {
-    category: 'by_category',
-    brand: 'by_brand',
-    tag: 'by_tag'
+  if (selectedCategory.value && selectedBrand.value) {
+    return props.aggregationData.by_category_brand?.[selectedCategory.value]?.[selectedBrand.value] || {}
   }
-
-  const key = map[filterType.value]
-  if (!filterValue.value) return props.aggregationData.overall
-  return props.aggregationData[key][filterValue.value] || {}
+  if (selectedCategory.value) return props.aggregationData.by_category[selectedCategory.value] || {}
+  if (selectedBrand.value) return props.aggregationData.by_brand[selectedBrand.value] || {}
+  return props.aggregationData.overall
 })
 </script>
 
@@ -141,6 +169,11 @@ select:focus {
   border-color: #378ADD;
 }
 
+.count-info {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -172,5 +205,26 @@ td.metric-label {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+td.muted {
+  color: #6b7280;
+}
+
+.clear-btn {
+  align-self: flex-end;
+  padding: 0.4rem 0.75rem;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #6b7280;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
 }
 </style>

@@ -135,15 +135,40 @@ async def get_products_aggregation() -> dict:
     all_brands = sorted(set(p.brand for p in products if p.brand))
     all_tags = sorted(set(tag for p in products for tag in p.tags))
 
+    def median(values):
+        sorted_vals = sorted(values)
+        n = len(sorted_vals)
+        mid = n // 2
+        if n % 2 == 0:
+            return round((sorted_vals[mid - 1] + sorted_vals[mid]) / 2, 2)
+        return round(sorted_vals[mid], 2)
+
     def aggregate(items):
         prices = [p.price for p in items]
         stocks = [p.stock for p in items]
         ratings = [p.rating for p in items]
         return {
             "count": len(items),
-            "price": {"min": min(prices), "max": max(prices), "avg": round(sum(prices)/len(prices), 2)},
-            "stock": {"min": min(stocks), "max": max(stocks), "avg": round(sum(stocks)/len(stocks), 2)},
-            "rating": {"min": min(ratings), "max": max(ratings), "avg": round(sum(ratings)/len(ratings), 2)},
+            "price": {
+                "min": round(min(prices), 2),
+                "max": round(max(prices), 2),
+                "avg": round(sum(prices) / len(prices), 2),
+                "median": median(prices),
+                "total": round(sum(prices), 2)
+            },
+            "stock": {
+                "min": min(stocks),
+                "max": max(stocks),
+                "avg": round(sum(stocks) / len(stocks), 2),
+                "median": median(stocks),
+                "total": sum(stocks)
+            },
+            "rating": {
+                "min": round(min(ratings), 2),
+                "max": round(max(ratings), 2),
+                "avg": round(sum(ratings) / len(ratings), 2),
+                "median": median(ratings)
+            }
         }
 
     return {
@@ -151,6 +176,13 @@ async def get_products_aggregation() -> dict:
         "by_category": {cat: aggregate([p for p in products if p.category == cat]) for cat in all_categories},
         "by_brand": {brand: aggregate([p for p in products if p.brand == brand]) for brand in all_brands},
         "by_tag": {tag: aggregate([p for p in products if tag in p.tags]) for tag in all_tags},
+        "by_category_brand": {
+            cat: {
+                brand: aggregate([p for p in products if p.category == cat and p.brand == brand])
+                for brand in sorted(set(p.brand for p in products if p.category == cat and p.brand))
+            }
+            for cat in all_categories
+        },
         "filter_options": {
             "categories": all_categories,
             "brands": all_brands,
