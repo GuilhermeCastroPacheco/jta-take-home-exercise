@@ -1,7 +1,6 @@
 <template>
   <div class="table-full-wrapper">
 
-    <!-- Filtros e pesquisa -->
     <div class="toolbar">
       <div class="search-group">
         <input v-model="search" type="text" :placeholder="searchPlaceholder" class="search-input" />
@@ -16,14 +15,25 @@
           <span class="attention-dot"></span>
           Needs attention
         </button>
-        <select v-for="filter in filters" :key="filter.field" v-model="activeFilters[filter.field]" class="select-input">
+        <select
+          v-for="filter in filters"
+          :key="filter.field"
+          v-model="activeFilters[filter.field]"
+          class="select-input"
+        >
           <option value="">{{ filter.label }}</option>
-          <option v-for="opt in filter.options" :key="opt" :value="opt">{{ opt }}</option>
+          <option
+            v-for="opt in availableOptions(filter)"
+            :key="opt"
+            :value="opt"
+          >{{ opt }}</option>
         </select>
+        <button v-if="hasActiveFilters" class="clear-btn" @click="clearFilters">
+          Clear filters
+        </button>
       </div>
     </div>
 
-    <!-- Info e sort -->
     <div class="table-meta">
       <span class="total-info">
         Showing {{ firstItem }}–{{ lastItem }} of {{ filteredData.length }}
@@ -34,13 +44,12 @@
           <option value="">None</option>
           <option v-for="s in sortOptions" :key="s.field" :value="s.field">{{ s.label }}</option>
         </select>
-        <button class="sort-dir-btn" @click="toggleSortDir" :title="sortDir === 'asc' ? 'Ascending' : 'Descending'">
+        <button class="sort-dir-btn" @click="toggleSortDir">
           {{ sortDir === 'asc' ? '↑' : '↓' }}
         </button>
       </div>
     </div>
 
-    <!-- Tabela -->
     <div class="table-scroll">
       <table>
         <thead>
@@ -51,11 +60,7 @@
         </thead>
         <tbody>
           <tr v-for="(row, index) in paginatedData" :key="index">
-            <td
-              v-for="col in columns"
-              :key="col.field"
-              :class="{ muted: col.muted }"
-            >
+            <td v-for="col in columns" :key="col.field" :class="{ muted: col.muted }">
               <img
                 v-if="col.type === 'image'"
                 :src="row[col.field]"
@@ -81,7 +86,6 @@
       </table>
     </div>
 
-    <!-- Paginação -->
     <div class="pagination">
       <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
         <i class="pi pi-chevron-left" />
@@ -101,41 +105,25 @@ import { ref, computed, watch, onMounted } from 'vue'
 const props = defineProps({
   columns: Array,
   data: Array,
-  filters: {
-    type: Array,
-    default: () => []
-  },
-  sortOptions: {
-    type: Array,
-    default: () => []
-  },
-  searchPlaceholder: {
-    type: String,
-    default: 'Search...'
-  },
-  searchFields: {
-    type: Array,
-    default: () => []
-  },
-  detailRoute: {
-    type: String,
-    default: null
-  },
-  pageSize: {
-    type: Number,
-    default: 10
-  },
-  attentionIds: { 
-    type: Set, 
-    default: null 
-  },
-  initialAttention: {
-    type: Boolean,
-    default: false 
-  }
+  filters: { type: Array, default: () => [] },
+  sortOptions: { type: Array, default: () => [] },
+  searchPlaceholder: { type: String, default: 'Search...' },
+  searchFields: { type: Array, default: () => [] },
+  detailRoute: { type: String, default: null },
+  pageSize: { type: Number, default: 10 },
+  attentionIds: { type: Set, default: null },
+  initialAttention: { type: Boolean, default: false }
 })
 
-//const attentionActive = ref(false)
+const search = ref('')
+const currentPage = ref(1)
+const sortField = ref('')
+const sortDir = ref('asc')
+const attentionActive = ref(false)
+
+const activeFilters = ref(
+  Object.fromEntries(props.filters.map(f => [f.field, '']))
+)
 
 onMounted(() => {
   if (props.initialAttention) {
@@ -143,40 +131,26 @@ onMounted(() => {
   }
 })
 
-const search = ref('')
-const currentPage = ref(1)
-const sortField = ref('')
-const sortDir = ref('asc')
-
-const activeFilters = ref(
-  Object.fromEntries(props.filters.map(f => [f.field, '']))
-)
-
 const toggleSortDir = () => {
   sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
 }
 
-// Reset página quando filtros ou pesquisa mudam
 watch([search, activeFilters, sortField, sortDir], () => {
   currentPage.value = 1
 }, { deep: true })
 
-const attentionActive = ref(false)
-
-// Reset quando os dados mudam
 watch(() => props.data, () => {
   currentPage.value = 1
 })
 
-const filteredData = computed(() => {
+// Dados filtrados por todos os filtros excepto o filtro atual
+const dataFilteredExcept = (excludeField) => {
   let result = [...(props.data || [])]
 
-  // Filtro de atenção
   if (attentionActive.value && props.attentionIds) {
     result = result.filter(row => props.attentionIds.has(row.id))
   }
 
-  // Pesquisa
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter(row =>
@@ -187,7 +161,59 @@ const filteredData = computed(() => {
     )
   }
 
-  // Filtros
+  props.filters.forEach(filter => {
+    if (filter.field === excludeField) return
+    const val = activeFilters.value[filter.field]
+    if (val) {
+      result = result.filter(row => {
+        const rowVal = filter.getValue ? filter.getValue(row) : row[filter.field]
+        return rowVal === val
+      })
+    }
+  })
+
+  return result
+}
+
+// Opções disponíveis para cada filtro baseadas nos dados já filtrados pelos outros
+const availableOptions = (filter) => {
+  const data = dataFilteredExcept(filter.field)
+  const values = data.map(row =>
+    filter.getValue ? filter.getValue(row) : row[filter.field]
+  ).filter(Boolean)
+  return [...new Set(values)].sort()
+}
+
+// Watch para limpar filtros que ficam inválidos
+watch(activeFilters, (newFilters) => {
+  props.filters.forEach(filter => {
+    const val = newFilters[filter.field]
+    if (val) {
+      const available = availableOptions(filter)
+      if (!available.includes(val)) {
+        activeFilters.value[filter.field] = ''
+      }
+    }
+  })
+}, { deep: true })
+
+const filteredData = computed(() => {
+  let result = [...(props.data || [])]
+
+  if (attentionActive.value && props.attentionIds) {
+    result = result.filter(row => props.attentionIds.has(row.id))
+  }
+
+  if (search.value) {
+    const q = search.value.toLowerCase()
+    result = result.filter(row =>
+      props.searchFields.some(field => {
+        const val = typeof field === 'function' ? field(row) : row[field]
+        return String(val || '').toLowerCase().includes(q)
+      })
+    )
+  }
+
   props.filters.forEach(filter => {
     const val = activeFilters.value[filter.field]
     if (val) {
@@ -198,7 +224,6 @@ const filteredData = computed(() => {
     }
   })
 
-  // Sort
   if (sortField.value) {
     result.sort((a, b) => {
       const sortOpt = props.sortOptions.find(s => s.field === sortField.value)
@@ -242,6 +267,17 @@ const stockClass = (row) => {
   if (row.stock < row.minimumOrderQuantity) return 'stock-red'
   if (row.stock < row.minimumOrderQuantity * 2) return 'stock-amber'
   return ''
+}
+
+const hasActiveFilters = computed(() =>
+  Object.values(activeFilters.value).some(v => v !== '') || attentionActive.value
+)
+
+const clearFilters = () => {
+  props.filters.forEach(f => {
+    activeFilters.value[f.field] = ''
+  })
+  attentionActive.value = false
 }
 </script>
 
@@ -470,5 +506,21 @@ td.muted {
   height: 7px;
   border-radius: 50%;
   background: #b91c1c;
+}
+
+.clear-btn {
+  padding: 0.5rem 0.75rem;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #6b7280;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
 }
 </style>
