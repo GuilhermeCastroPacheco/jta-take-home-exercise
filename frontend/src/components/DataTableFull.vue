@@ -4,20 +4,19 @@
     <!-- Filtros e pesquisa -->
     <div class="toolbar">
       <div class="search-group">
-        <input
-          v-model="search"
-          type="text"
-          :placeholder="searchPlaceholder"
-          class="search-input"
-        />
+        <input v-model="search" type="text" :placeholder="searchPlaceholder" class="search-input" />
       </div>
       <div class="filters-group">
-        <select
-          v-for="filter in filters"
-          :key="filter.field"
-          v-model="activeFilters[filter.field]"
-          class="select-input"
+        <button
+          v-if="attentionIds"
+          class="attention-btn"
+          :class="{ active: attentionActive }"
+          @click="attentionActive = !attentionActive"
         >
+          <span class="attention-dot"></span>
+          Needs attention
+        </button>
+        <select v-for="filter in filters" :key="filter.field" v-model="activeFilters[filter.field]" class="select-input">
           <option value="">{{ filter.label }}</option>
           <option v-for="opt in filter.options" :key="opt" :value="opt">{{ opt }}</option>
         </select>
@@ -97,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 
 const props = defineProps({
   columns: Array,
@@ -125,6 +124,22 @@ const props = defineProps({
   pageSize: {
     type: Number,
     default: 10
+  },
+  attentionIds: { 
+    type: Set, 
+    default: null 
+  },
+  initialAttention: {
+    type: Boolean,
+    default: false 
+  }
+})
+
+//const attentionActive = ref(false)
+
+onMounted(() => {
+  if (props.initialAttention) {
+    attentionActive.value = true
   }
 })
 
@@ -146,17 +161,27 @@ watch([search, activeFilters, sortField, sortDir], () => {
   currentPage.value = 1
 }, { deep: true })
 
+const attentionActive = ref(false)
+
+// Reset quando os dados mudam
+watch(() => props.data, () => {
+  currentPage.value = 1
+})
+
 const filteredData = computed(() => {
   let result = [...(props.data || [])]
+
+  // Filtro de atenção
+  if (attentionActive.value && props.attentionIds) {
+    result = result.filter(row => props.attentionIds.has(row.id))
+  }
 
   // Pesquisa
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter(row =>
       props.searchFields.some(field => {
-        const val = typeof field === 'function'
-          ? field(row)
-          : row[field]
+        const val = typeof field === 'function' ? field(row) : row[field]
         return String(val || '').toLowerCase().includes(q)
       })
     )
@@ -415,4 +440,35 @@ td.muted {
 
 .stock-red { color: #b91c1c; font-weight: 500; }
 .stock-amber { color: #b45309; font-weight: 500; }
+
+.attention-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 0.75rem;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #6b7280;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.attention-btn:hover {
+  background: #f3f4f6;
+}
+
+.attention-btn.active {
+  background: #fef2f2;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
+.attention-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b91c1c;
+}
 </style>

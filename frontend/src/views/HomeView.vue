@@ -36,6 +36,8 @@
           :value="productsSummary.low_stock.length"
           badge="Needs attention"
           badgeType="red"
+          @click="goToAttention"
+          class="clickable"
         />
       </div>
 
@@ -86,6 +88,13 @@ import UserReviewDoughnutChart from '../components/charts/UserReviewDoughnutChar
 import ProductAggregationTable from '../components/tables/ProductAggregationTable.vue'
 import UserReviewAggregationTable from '../components/tables/UserReviewAggregationTable.vue'
 import { useHome } from '../composables/useHome'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goToAttention = () => {
+  router.push('/products/all?attention=true')
+}
 
 const { usersSummary, productsSummary, usersInsights, productsAggregation, loading, error } = useHome()
 </script>
@@ -145,6 +154,14 @@ const { usersSummary, productsSummary, usersInsights, productsAggregation, loadi
 .error {
   color: #b91c1c;
   font-size: 0.9rem;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.clickable:hover {
+  opacity: 0.85;
 }
 
 @media (max-width: 768px) {

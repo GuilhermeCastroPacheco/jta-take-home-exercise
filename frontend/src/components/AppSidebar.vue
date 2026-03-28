@@ -16,9 +16,17 @@
           <i class="pi pi-users" />
           Users
         </RouterLink>
+        <RouterLink to="/users/all" class="nav-item nav-item--sub">
+          <i class="pi pi-table" />
+          Users List
+        </RouterLink>
         <RouterLink to="/products" class="nav-item">
           <i class="pi pi-box" />
           Products
+        </RouterLink>
+        <RouterLink to="/products/all" class="nav-item nav-item--sub">
+          <i class="pi pi-table" />
+          Products List
         </RouterLink>
       </nav>
     </aside>
@@ -35,17 +43,25 @@
         <span class="sidebar-logo">JTA</span>
       </template>
       <nav class="sidebar-nav">
-        <RouterLink to="/" class="nav-item" @click="drawerOpen = false">
+        <RouterLink to="/" class="nav-item">
           <i class="pi pi-home" />
           Home
         </RouterLink>
-        <RouterLink to="/users" class="nav-item" @click="drawerOpen = false">
+        <RouterLink to="/users" class="nav-item">
           <i class="pi pi-users" />
           Users
         </RouterLink>
-        <RouterLink to="/products" class="nav-item" @click="drawerOpen = false">
+        <RouterLink to="/users/all" class="nav-item nav-item--sub">
+          <i class="pi pi-table" />
+          Users List
+        </RouterLink>
+        <RouterLink to="/products" class="nav-item">
           <i class="pi pi-box" />
           Products
+        </RouterLink>
+        <RouterLink to="/products/all" class="nav-item nav-item--sub">
+          <i class="pi pi-table" />
+          Products List
         </RouterLink>
       </nav>
     </Drawer>
@@ -146,6 +162,12 @@ const drawerOpen = ref(false)
   flex: 1;
   padding: 2rem;
   background: #f9fafb;
+}
+
+.nav-item--sub {
+  padding-left: 1.75rem;
+  font-size: 0.85rem;
+  color: #6b7280;
 }
 
 @media (max-width: 768px) {

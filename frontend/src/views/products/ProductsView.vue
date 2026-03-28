@@ -30,6 +30,8 @@
           :value="productsSummary.low_stock.length"
           badge="Needs attention"
           badgeType="red"
+          @click="goToAttention"
+          class="clickable"
         />
       </div>
 
@@ -67,6 +69,13 @@ import DataTable from '../../components/DataTable.vue'
 import ProductAggregationTable from '../../components/tables/ProductAggregationTable.vue'
 import ProductTopBarChart from '../../components/charts/ProductTopBarChart.vue'
 import { useProducts } from '../../composables/useProducts'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goToAttention = () => {
+  router.push('/products/all?attention=true')
+}
 
 const { productsSummary, products, productsAggregation, loading, error } = useProducts()
 
@@ -152,6 +161,14 @@ const productColumns = [
 .error {
   color: #b91c1c;
   font-size: 0.9rem;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.clickable:hover {
+  opacity: 0.85;
 }
 
 @media (max-width: 768px) {

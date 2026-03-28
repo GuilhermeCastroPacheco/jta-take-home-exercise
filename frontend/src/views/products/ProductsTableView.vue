@@ -22,6 +22,8 @@
           :filters="productFilters"
           :sortOptions="sortOptions"
           :searchFields="searchFields"
+          :attentionIds="attentionIds"
+          :initialAttention="route.query.attention === 'true'"
           searchPlaceholder="Search by title..."
           detailRoute="/products"
           :pageSize="10"
@@ -36,8 +38,21 @@
 import { computed } from 'vue'
 import DataTableFull from '../../components/DataTableFull.vue'
 import { useProducts } from '../../composables/useProducts'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const { products, loading, error } = useProducts()
+
+const attentionIds = computed(() => {
+  if (!products.value?.length) return null
+  const attentionProducts = products.value.filter(p =>
+    p.stock < p.minimumOrderQuantity ||
+    p.availabilityStatus === 'Low Stock' ||
+    p.availabilityStatus === 'Out of Stock'
+  )
+  return new Set(attentionProducts.map(p => p.id))
+})
 
 const productColumns = [
   { field: 'thumbnail', header: '', type: 'image' },
@@ -46,32 +61,17 @@ const productColumns = [
   { field: 'brand', header: 'Brand', formatter: (row) => row.brand || '—' },
   { field: 'price', header: 'Price', muted: true, prefix: '$' },
   { field: 'rating', header: 'Rating' },
-  //{ field: 'stock', header: 'Stock', muted: true, formatter: (row) => row.stock },
-  { field: 'stock', header: 'Stock', muted: true, type: 'stock' },
+  { field: 'stock', header: 'Stock', type: 'stock' },
   { field: 'availabilityStatus', header: 'Status' }
 ]
 
 const productFilters = computed(() => {
   if (!products.value?.length) return []
-
   const unique = (fn) => [...new Set(products.value.map(fn).filter(Boolean))].sort()
-
   return [
-    {
-      field: 'category',
-      label: 'Category',
-      options: unique(p => p.category)
-    },
-    {
-      field: 'brand',
-      label: 'Brand',
-      options: unique(p => p.brand)
-    },
-    {
-      field: 'availabilityStatus',
-      label: 'Status',
-      options: unique(p => p.availabilityStatus)
-    }
+    { field: 'category', label: 'Category', options: unique(p => p.category) },
+    { field: 'brand', label: 'Brand', options: unique(p => p.brand) },
+    { field: 'availabilityStatus', label: 'Status', options: unique(p => p.availabilityStatus) }
   ]
 })
 

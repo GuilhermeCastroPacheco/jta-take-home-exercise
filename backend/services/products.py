@@ -45,10 +45,18 @@ async def get_products_summary() -> dict:
     for p in products:
         availability_distribution[p.availabilityStatus] = availability_distribution.get(p.availabilityStatus, 0) + 1
 
+    statuses = set(p.availabilityStatus for p in products)
+    print("Statuses found:", statuses)
+    low_by_status = [p for p in products if p.availabilityStatus.lower() in ["low stock", "out of stock"]]
+    print("Low by status:", len(low_by_status))
+    low_by_stock = [p for p in products if p.stock < p.minimumOrderQuantity]
+    print("Low by stock:", len(low_by_stock))
+
     # Produtos com baixo stock (stock abaixo do minimumOrderQuantity)
     low_stock = [
         p.model_dump() for p in products
         if p.stock < p.minimumOrderQuantity
+        or p.availabilityStatus.lower() in ["low stock", "out of stock"]
     ]
 
     # Top 5 produtos melhor avaliados
