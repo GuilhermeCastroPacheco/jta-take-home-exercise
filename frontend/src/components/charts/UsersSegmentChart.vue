@@ -25,7 +25,7 @@ const props = defineProps({
   usersSummary: Object
 })
 
-const selectedSegment = ref('gender')
+const selectedSegment = ref('age_gender')
 
 const COLORS = [
   '#378ADD', '#D4537E', '#639922', '#BA7517',
@@ -47,15 +47,24 @@ const chartData = computed(() => {
     data = Object.values(props.usersSummary.age_groups)
   } else {
     const dist = props.usersSummary.age_gender_distribution || {}
-    labels = Object.keys(dist)
-    data = Object.values(dist)
+    const sorted = Object.entries(dist).sort((a, b) => b[1] - a[1])
+    const top5 = sorted.slice(0, 5)
+    const others = sorted.slice(5).reduce((sum, [, val]) => sum + val, 0)
+
+    labels = top5.map(([key]) => key)
+    data = top5.map(([, val]) => val)
+
+    if (others > 0) {
+      labels.push('Others')
+      data.push(others)
+    }
   }
 
   return {
     labels,
     datasets: [{
       data,
-      backgroundColor: COLORS.slice(0, labels.length)
+      backgroundColor: [...COLORS.slice(0, labels.length - (labels.includes('Others') ? 1 : 0)), '#e5e7eb'].slice(0, labels.length)
     }]
   }
 })

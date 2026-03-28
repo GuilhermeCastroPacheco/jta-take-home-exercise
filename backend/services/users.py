@@ -234,22 +234,36 @@ async def get_users_geo() -> dict:
             if location_type == "address":
                 state = u.address.state
                 city = u.address.city
+                if state not in by_city:
+                    by_city[state] = {}
+                by_city[state][city] = by_city[state].get(city, 0) + 1
+
             elif location_type == "company":
                 state = u.company.address.state
                 city = u.company.address.city
+                if state not in by_city:
+                    by_city[state] = {}
+                by_city[state][city] = by_city[state].get(city, 0) + 1
+
             elif location_type == "university":
                 uni_data = UNIVERSITIES.get(u.university)
                 if not uni_data:
                     continue
                 state = uni_data["state"]
                 city = uni_data["city"]
+
+                if state not in by_city:
+                    by_city[state] = {}
+                if city not in by_city[state]:
+                    by_city[state][city] = {"count": 0, "universities": {}}
+                by_city[state][city]["count"] += 1
+                by_city[state][city]["universities"][u.university] = \
+                    by_city[state][city]["universities"].get(u.university, 0) + 1
+
             else:
                 continue
 
             by_state[state] = by_state.get(state, 0) + 1
-            if state not in by_city:
-                by_city[state] = {}
-            by_city[state][city] = by_city[state].get(city, 0) + 1
 
         return {
             "by_state": by_state,

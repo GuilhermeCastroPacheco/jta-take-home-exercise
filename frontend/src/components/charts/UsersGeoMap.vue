@@ -22,8 +22,11 @@
     <div ref="mapContainer" class="map-container"></div>
 
     <div v-if="selectedState" class="city-breakdown">
-      <h4>{{ selectedState }} — cities</h4>
-      <div class="city-list">
+    <h4>{{ selectedState }}</h4>
+    <div class="city-list">
+
+      <!-- Address e Company — estrutura simples -->
+      <template v-if="selectedType !== 'university'">
         <div
           v-for="(count, city) in currentData.by_city[selectedState]"
           :key="city"
@@ -32,8 +35,32 @@
           <span class="city-name">{{ city }}</span>
           <span class="city-count">{{ count }} user{{ count !== 1 ? 's' : '' }}</span>
         </div>
-      </div>
+      </template>
+
+      <!-- University — estrutura dois níveis -->
+      <template v-else>
+        <div
+          v-for="(cityData, city) in currentData.by_city[selectedState]"
+          :key="city"
+          class="city-block"
+        >
+          <div class="city-row city-row--header">
+            <span class="city-name">{{ city }}</span>
+            <span class="city-count">{{ cityData.count }} user{{ cityData.count !== 1 ? 's' : '' }}</span>
+          </div>
+          <div
+            v-for="(count, university) in cityData.universities"
+            :key="university"
+            class="university-row"
+          >
+            <span class="university-name">{{ university }}</span>
+            <span class="university-count">{{ count }}</span>
+          </div>
+        </div>
+      </template>
+
     </div>
+  </div>
 
     <div class="legend">
       <span class="leg-label">0</span>
@@ -319,5 +346,34 @@ select:focus {
   width: 20px;
   height: 10px;
   border-radius: 2px;
+}
+
+.city-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.city-row--header {
+  font-weight: 500;
+}
+
+.university-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0 4px 1rem;
+  border-bottom: 0.5px solid #f3f4f6;
+  font-size: 0.75rem;
+}
+
+.university-row:last-child {
+  border-bottom: 0.5px solid #e5e7eb;
+}
+
+.university-name {
+  color: #6b7280;
+}
+
+.university-count {
+  color: #6b7280;
 }
 </style>
