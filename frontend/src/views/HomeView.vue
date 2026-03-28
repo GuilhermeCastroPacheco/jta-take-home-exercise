@@ -64,16 +64,26 @@
       <!-- Table1 e Table2 -->
       <div class="row">
         <div class="card">
-          <h3>Product aggregation</h3>
-          <ProductAggregationTable
-            :aggregationData="productsAggregation"
-          />
+          <div class="card-content">
+            <h3>Product aggregation</h3>
+            <ProductAggregationTable
+              :aggregationData="productsAggregation"
+            />
+          </div>
+          <div class="card-footer">
+            <RouterLink to="/products" class="explore-link">Explore products →</RouterLink>
+          </div>
         </div>
         <div class="card">
-          <h3>Review aggregation by user segment</h3>
-          <UserReviewAggregationTable
-            :userReviewData="usersInsights.user_review_data"
-          />
+          <div class="card-content">
+            <h3>Average review by user segment aggregation</h3>
+            <UserReviewAggregationTable
+              :userReviewData="usersInsights.user_review_data"
+            />
+          </div>
+          <div class="card-footer">
+            <RouterLink to="/users" class="explore-link">Explore users →</RouterLink>
+          </div>
         </div>
       </div>
 
@@ -162,6 +172,33 @@ const { usersSummary, productsSummary, usersInsights, productsAggregation, loadi
 }
 .clickable:hover {
   opacity: 0.85;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  border-top: 0.5px solid #f3f4f6;
+}
+
+.explore-link {
+  font-size: 0.8rem;
+  color: #1d4ed8;
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.explore-link:hover {
+  background: #f3f4f6;
 }
 
 @media (max-width: 768px) {

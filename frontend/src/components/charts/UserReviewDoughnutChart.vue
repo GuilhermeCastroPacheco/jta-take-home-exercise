@@ -6,23 +6,19 @@
         <label>Category</label>
         <select v-model="selectedCategory">
           <option value="">All</option>
-          <option v-for="cat in filterOptions.categories" :key="cat" :value="cat">{{ cat }}</option>
+          <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
       </div>
       <div class="control-group">
         <label>Brand</label>
         <select v-model="selectedBrand">
           <option value="">All</option>
-          <option v-for="brand in filterOptions.brands" :key="brand" :value="brand">{{ brand }}</option>
+          <option v-for="brand in availableBrands" :key="brand" :value="brand">{{ brand }}</option>
         </select>
       </div>
-      <div class="control-group">
-        <label>Tag</label>
-        <select v-model="selectedTag">
-          <option value="">All</option>
-          <option v-for="tag in filterOptions.tags" :key="tag" :value="tag">{{ tag }}</option>
-        </select>
-      </div>
+      <button v-if="isFiltered" class="clear-btn" @click="clearFilters">
+        Clear filters
+      </button>
     </div>
 
     <Doughnut :data="chartData" :options="chartOptions" />
@@ -35,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 
@@ -50,7 +46,6 @@ const props = defineProps({
 
 const selectedCategory = ref('')
 const selectedBrand = ref('')
-const selectedTag = ref('')
 
 const RATING_BANDS = ['0-1', '1-2', '2-3', '3-4', '4-5']
 
@@ -62,17 +57,57 @@ const getRatingBand = (avg) => {
   return '4-5'
 }
 
-const isFiltered = computed(() =>
-  !!selectedCategory.value || !!selectedBrand.value || !!selectedTag.value
-)
+const isFiltered = computed(() => !!selectedCategory.value || !!selectedBrand.value)
+
+const clearFilters = () => {
+  selectedCategory.value = ''
+  selectedBrand.value = ''
+}
+
+const availableBrands = computed(() => {
+  if (!props.filterOptions) return []
+  if (selectedCategory.value) {
+    return [...new Set(
+      props.userReviewData
+        .flatMap(u => u.reviews)
+        .filter(r => r.productCategory === selectedCategory.value && r.productBrand !== 'No brand')
+        .map(r => r.productBrand)
+    )].sort()
+  }
+  return props.filterOptions.brands
+})
+
+const availableCategories = computed(() => {
+  if (!props.filterOptions) return []
+  if (selectedBrand.value) {
+    return [...new Set(
+      props.userReviewData
+        .flatMap(u => u.reviews)
+        .filter(r => r.productBrand === selectedBrand.value)
+        .map(r => r.productCategory)
+    )].sort()
+  }
+  return props.filterOptions.categories
+})
+
+watch(selectedCategory, () => {
+  if (selectedBrand.value && !availableBrands.value.includes(selectedBrand.value)) {
+    selectedBrand.value = ''
+  }
+})
+
+watch(selectedBrand, () => {
+  if (selectedCategory.value && !availableCategories.value.includes(selectedCategory.value)) {
+    selectedCategory.value = ''
+  }
+})
 
 const filteredData = computed(() => {
   return props.userReviewData.map(user => {
     const filteredReviews = user.reviews.filter(r => {
       const matchCategory = !selectedCategory.value || r.productCategory === selectedCategory.value
       const matchBrand = !selectedBrand.value || r.productBrand === selectedBrand.value
-      const matchTag = !selectedTag.value || r.productTags.includes(selectedTag.value)
-      return matchCategory && matchBrand && matchTag
+      return matchCategory && matchBrand
     })
     return { ...user, reviews: filteredReviews }
   })
@@ -139,6 +174,7 @@ const chartOptions = computed(() => ({
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .control-group {
@@ -166,6 +202,23 @@ select {
 
 select:focus {
   border-color: #378ADD;
+}
+
+.clear-btn {
+  align-self: flex-end;
+  padding: 0.4rem 0.75rem;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #6b7280;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .filter-note {

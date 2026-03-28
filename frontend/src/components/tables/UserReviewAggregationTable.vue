@@ -10,6 +10,13 @@
           <option value="state">State</option>
         </select>
       </div>
+      <div class="control-group" v-if="selectedSegment === 'state'">
+        <label>Show</label>
+        <select v-model="stateFilter">
+          <option value="top5">Top 5 avg. rating</option>
+          <option value="bottom5">Bottom 5 avg. rating</option>
+        </select>
+      </div>
     </div>
 
     <table>
@@ -18,13 +25,13 @@
           <th>{{ segmentLabel }}</th>
           <th>Users</th>
           <th>Total reviews</th>
-          <th>Min avg. rating</th>
-          <th>Max avg. rating</th>
-          <th>Avg. rating</th>
+          <th>MIN</th>
+          <th>MAX</th>
+          <th>AVG</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in tableData" :key="row.segment">
+        <tr v-for="row in displayData" :key="row.segment">
           <td class="segment-label">{{ row.segment }}</td>
           <td>{{ row.userCount }}</td>
           <td>{{ row.totalReviews }}</td>
@@ -50,13 +57,14 @@ const props = defineProps({
 })
 
 const selectedSegment = ref('gender')
+const stateFilter = ref('top5')
 
 const AGE_GROUPS = ['18-25', '26-30', '31-35', '36-40', '40+']
 
 const getAgeGroup = (age) => {
   if (age <= 25) return '18-25'
   if (age <= 30) return '26-30'
-  if (age <= 36) return '31-36'
+  if (age <= 35) return '31-35'
   if (age <= 40) return '36-40'
   return '40+'
 }
@@ -106,6 +114,17 @@ const tableData = computed(() => {
   })
 })
 
+const displayData = computed(() => {
+  if (selectedSegment.value !== 'state') return tableData.value
+
+  const withRatings = tableData.value.filter(r => r.avgRating !== '—')
+  const sorted = [...withRatings].sort((a, b) =>
+    parseFloat(b.avgRating) - parseFloat(a.avgRating)
+  )
+
+  return stateFilter.value === 'top5' ? sorted.slice(0, 5) : sorted.slice(-5).reverse()
+})
+
 const ratingClass = (rating) => {
   if (rating === '—') return ''
   const val = parseFloat(rating)
@@ -125,6 +144,7 @@ const ratingClass = (rating) => {
 .controls {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .control-group {

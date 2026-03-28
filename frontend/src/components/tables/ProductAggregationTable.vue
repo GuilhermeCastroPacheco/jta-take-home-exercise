@@ -57,14 +57,13 @@
           <td>{{ aggregated.stock?.median }}</td>
           <td>{{ aggregated.rating?.median }}</td>
         </tr>
-        <tr>
-          <td class="metric-label">Total</td>
-          <td>${{ aggregated.price?.total }}</td>
-          <td>{{ aggregated.stock?.total }}</td>
-          <td class="muted">—</td>
-        </tr>
       </tbody>
     </table>
+
+    <div class="inventory-value">
+      <span class="inventory-label">Total inventory value</span>
+      <span class="inventory-amount">${{ inventoryValue }}</span>
+    </div>
 
   </div>
 </template>
@@ -126,6 +125,14 @@ const aggregated = computed(() => {
   if (selectedCategory.value) return props.aggregationData.by_category[selectedCategory.value] || {}
   if (selectedBrand.value) return props.aggregationData.by_brand[selectedBrand.value] || {}
   return props.aggregationData.overall
+})
+
+const inventoryValue = computed(() => {
+  if (!aggregated.value?.price?.total || !aggregated.value?.stock?.total) return '—'
+  return (aggregated.value.price.avg * aggregated.value.stock.total).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 })
 </script>
 
@@ -226,5 +233,25 @@ td.muted {
 .clear-btn:hover {
   background: #f3f4f6;
   color: #111827;
+}
+
+.inventory-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 0 0;
+  border-top: 0.5px solid #e5e7eb;
+  font-size: 0.85rem;
+  padding-right: 2rem;
+}
+
+.inventory-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.inventory-amount {
+  color: #111827;
+  font-weight: 500;
 }
 </style>
