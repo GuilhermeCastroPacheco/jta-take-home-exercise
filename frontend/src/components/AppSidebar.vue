@@ -18,7 +18,7 @@
         </RouterLink>
         <RouterLink to="/users/all" class="nav-item nav-item--sub">
           <i class="pi pi-table" />
-          Users List
+          Users Detail
         </RouterLink>
         <RouterLink to="/products" class="nav-item">
           <i class="pi pi-box" />
@@ -26,7 +26,7 @@
         </RouterLink>
         <RouterLink to="/products/all" class="nav-item nav-item--sub">
           <i class="pi pi-table" />
-          Products List
+          Products Detail
         </RouterLink>
       </nav>
     </aside>
@@ -53,7 +53,7 @@
         </RouterLink>
         <RouterLink to="/users/all" class="nav-item nav-item--sub">
           <i class="pi pi-table" />
-          Users List
+          Users Detail
         </RouterLink>
         <RouterLink to="/products" class="nav-item">
           <i class="pi pi-box" />
@@ -61,7 +61,7 @@
         </RouterLink>
         <RouterLink to="/products/all" class="nav-item nav-item--sub">
           <i class="pi pi-table" />
-          Products List
+          Products Detail
         </RouterLink>
       </nav>
     </Drawer>
