@@ -213,4 +213,14 @@ tr:last-child td {
 .rating-green { background: #f0fdf4; color: #15803d; }
 .rating-amber { background: #fffbeb; color: #b45309; }
 .rating-red   { background: #fef2f2; color: #b91c1c; }
+
+@media (max-width: 768px) {
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 8px 4px 8px 0;
+  }
+}
 </style>

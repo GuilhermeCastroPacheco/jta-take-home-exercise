@@ -254,4 +254,14 @@ td.muted {
   color: #111827;
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 8px 4px 8px 0;
+  }
+}
 </style>

@@ -148,6 +148,7 @@ const { usersSummary, productsSummary, usersInsights, productsAggregation, loadi
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: hidden;
 }
 
 .card h3 {

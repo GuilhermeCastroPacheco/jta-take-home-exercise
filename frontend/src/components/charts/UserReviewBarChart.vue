@@ -182,6 +182,7 @@ const chartData = computed(() => {
 
 const chartOptions = {
   responsive: true,
+  maintainAspectRatio: true,
   plugins: { legend: { display: false } },
   scales: {
     y: {
@@ -252,5 +253,9 @@ select:focus {
 .clear-btn:hover {
   background: #f3f4f6;
   color: #111827;
+}
+
+canvas {
+  max-width: 100%;
 }
 </style>
