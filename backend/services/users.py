@@ -275,3 +275,127 @@ async def get_users_geo() -> dict:
         "company": aggregate_by_location("company"),
         "university": aggregate_by_location("university")
     }
+
+async def get_user_suggestions(user_id: int) -> dict:
+    raw = await fetch_user(user_id)
+    user = UserSchema(**raw)
+
+    products_raw = await fetch_products()
+    products = [ProductSchema(**p) for p in products_raw["products"]]
+
+    users_raw = await fetch_users()
+    users = parse_users(users_raw)
+
+    # Reviews do utilizador
+    user_reviews = []
+    for product in products:
+        for review in product.reviews:
+            if review.reviewerEmail.lower() == user.email.lower():
+                user_reviews.append({
+                    "productId": product.id,
+                    "productCategory": product.category,
+                    "productBrand": product.brand,
+                    "productTags": product.tags,
+                    "rating": review.rating
+                })
+
+    # Se não tiver reviews não há sugestões
+    if not user_reviews:
+        return {"suggestions": []}
+
+    # Extrair preferências do utilizador
+    reviewed_ids = {r["productId"] for r in user_reviews}
+    category_counts = {}
+    brand_counts = {}
+    tag_counts = {}
+
+    for r in user_reviews:
+        cat = r["productCategory"]
+        category_counts[cat] = category_counts.get(cat, 0) + (1 + r["rating"] / 5)
+        if r["productBrand"]:
+            brand_counts[r["productBrand"]] = brand_counts.get(r["productBrand"], 0) + 1
+        for tag in r["productTags"]:
+            tag_counts[tag] = tag_counts.get(tag, 0) + 1
+
+    # Utilizadores semelhantes (mesmo género e faixa etária)
+    def get_age_group(age):
+        if age <= 25: return "18-25"
+        if age <= 30: return "26-30"
+        if age <= 35: return "31-35"
+        if age <= 40: return "36-40"
+        return "40+"
+
+    user_age_group = get_age_group(user.age)
+    similar_users = [
+        u for u in users
+        if u.gender == user.gender
+        and get_age_group(u.age) == user_age_group
+        and u.id != user.id
+    ]
+
+    # Produtos reviewados por utilizadores semelhantes
+    similar_reviewed = {}
+    for product in products:
+        for review in product.reviews:
+            for su in similar_users:
+                if review.reviewerEmail.lower() == su.email.lower():
+                    similar_reviewed[product.id] = similar_reviewed.get(product.id, 0) + review.rating
+
+    # Score para cada produto não reviewado
+    scored = []
+    for product in products:
+        if product.id in reviewed_ids:
+            continue
+        if product.availabilityStatus == "Out of Stock":
+            continue
+
+        score = 0
+
+        # Score por categoria
+        if product.category in category_counts:
+            score += category_counts[product.category] * 3
+
+        # Score por brand
+        if product.brand and product.brand in brand_counts:
+            score += brand_counts[product.brand] * 2
+
+        # Score por tags
+        for tag in product.tags:
+            if tag in tag_counts:
+                score += tag_counts[tag]
+
+        # Score por utilizadores semelhantes
+        if product.id in similar_reviewed:
+            score += similar_reviewed[product.id] * 1.5
+
+        # Score por rating do produto
+        score += product.rating
+
+        if score > 0:
+            scored.append((product, score))
+
+    # Top 6 produtos
+    scored.sort(key=lambda x: x[1], reverse=True)
+    top = scored[:6]
+
+    return {
+        "suggestions": [
+            {
+                "id": p.id,
+                "title": p.title,
+                "category": p.category,
+                "brand": p.brand,
+                "price": p.price,
+                "rating": p.rating,
+                "thumbnail": p.thumbnail,
+                "availabilityStatus": p.availabilityStatus,
+                "score": round(score, 2)
+            }
+            for p, score in top
+        ],
+        "based_on": {
+            "top_categories": sorted(category_counts, key=category_counts.get, reverse=True)[:3],
+            "top_tags": sorted(tag_counts, key=tag_counts.get, reverse=True)[:3],
+            "similar_users_count": len(similar_users)
+        }
+    }

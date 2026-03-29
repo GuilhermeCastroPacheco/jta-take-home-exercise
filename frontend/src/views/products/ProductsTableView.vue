@@ -24,6 +24,9 @@
           :searchFields="searchFields"
           :attentionIds="attentionIds"
           :initialAttention="route.query.attention === 'true'"
+          :initialFilters="initialFilters"
+          :initialSort="initialSort"
+          :initialSortDir="initialSortDir"
           searchPlaceholder="Search by title..."
           detailRoute="/products"
           :pageSize="10"
@@ -35,12 +38,27 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import DataTableFull from '../../components/DataTableFull.vue'
 import { useProducts } from '../../composables/useProducts'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+
+const initialFilters = ref({})
+const initialSort = ref('')
+const initialSortDir = ref('asc')
+
+onMounted(() => {
+  const q = route.query
+  const filters = {}
+  if (q.category) filters.category = q.category
+  if (q.brand) filters.brand = q.brand
+  if (q.availabilityStatus) filters.availabilityStatus = q.availabilityStatus
+  initialFilters.value = filters
+  if (q.sort) initialSort.value = q.sort
+  if (q.dir) initialSortDir.value = q.dir
+})
 
 const { products, loading, error } = useProducts()
 

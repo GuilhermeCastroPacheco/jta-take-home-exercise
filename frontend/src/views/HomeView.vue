@@ -2,8 +2,11 @@
   <div class="home">
 
     <div class="page-header">
-      <h1>Dashboard</h1>
-      <p>Overview of users and products</p>
+      <div>
+        <h1>Dashboard</h1>
+        <p>Overview of users and products</p>
+      </div>
+      <AISearchBar />
     </div>
 
     <div v-if="loading" class="loading">Loading...</div>
@@ -97,6 +100,7 @@ import UserReviewBarChart from '../components/charts/UserReviewBarChart.vue'
 import UserReviewDoughnutChart from '../components/charts/UserReviewDoughnutChart.vue'
 import ProductAggregationTable from '../components/tables/ProductAggregationTable.vue'
 import UserReviewAggregationTable from '../components/tables/UserReviewAggregationTable.vue'
+import AISearchBar from '../components/AISearchBar.vue'
 import { useHome } from '../composables/useHome'
 import { useRouter } from 'vue-router'
 
@@ -120,6 +124,12 @@ const { usersSummary, productsSummary, usersInsights, productsAggregation, loadi
   font-size: 1.4rem;
   font-weight: 500;
   color: #111827;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .page-header p {

@@ -112,7 +112,10 @@ const props = defineProps({
   detailRoute: { type: String, default: null },
   pageSize: { type: Number, default: 10 },
   attentionIds: { type: Set, default: null },
-  initialAttention: { type: Boolean, default: false }
+  initialAttention: { type: Boolean, default: false },
+  initialFilters: { type: Object, default: () => ({}) },
+  initialSort: { type: String, default: '' },
+  initialSortDir: { type: String, default: 'asc' }
 })
 
 const search = ref('')
@@ -129,6 +132,17 @@ onMounted(() => {
   if (props.initialAttention) {
     attentionActive.value = true
   }
+
+  if (props.initialFilters && Object.keys(props.initialFilters).length > 0) {
+    Object.entries(props.initialFilters).forEach(([key, val]) => {
+      if (activeFilters.value.hasOwnProperty(key)) {
+        activeFilters.value[key] = val
+      }
+    })
+  }
+
+  if (props.initialSort) sortField.value = props.initialSort
+  if (props.initialSortDir) sortDir.value = props.initialSortDir
 })
 
 const toggleSortDir = () => {

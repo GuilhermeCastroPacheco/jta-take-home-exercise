@@ -245,7 +245,31 @@
           </div>
         </div>
       </div>
-
+      <!-- Suggested products -->
+      <div class="card" v-if="suggestions?.suggestions?.length">
+        <div>
+          <h3>Suggested products</h3>
+          <p class="suggestions-note">
+            Based on {{ suggestions.based_on.top_categories.join(', ') }} preferences
+            · {{ suggestions.based_on.similar_users_count }} similar users considered
+          </p>
+        </div>
+        <div class="suggestions-grid">
+          <RouterLink
+            v-for="product in suggestions.suggestions"
+            :key="product.id"
+            :to="`/products/${product.id}`"
+            class="suggestion-card"
+          >
+            <img :src="product.thumbnail" :alt="product.title" class="suggestion-thumb" />
+            <div class="suggestion-info">
+              <span class="suggestion-title">{{ product.title }}</span>
+              <span class="suggestion-meta">{{ product.category }} · ${{ product.price }}</span>
+              <span class="suggestion-rating">★ {{ product.rating }}</span>
+            </div>
+          </RouterLink>
+        </div>
+      </div>
     </template>
 
   </div>
@@ -254,21 +278,28 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getUser } from '../../services/api'
+import { getUser, getUserSuggestions } from '../../services/api'
 
 const route = useRoute()
 const user = ref(null)
 const loading = ref(true)
 const error = ref(null)
+const suggestions = ref(null)
+const suggestionsLoading = ref(true)
 
 onMounted(async () => {
   try {
     const res = await getUser(route.params.id)
     user.value = res.data
+
+    // Buscar sugestões em paralelo
+    const suggestionsRes = await getUserSuggestions(route.params.id)
+    suggestions.value = suggestionsRes.data
   } catch (e) {
     error.value = 'Failed to load user'
   } finally {
     loading.value = false
+    suggestionsLoading.value = false
   }
 })
 </script>
@@ -557,6 +588,10 @@ onMounted(async () => {
     max-width: 180px;
     white-space: nowrap;
   }
+
+  .suggestions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   
 }
 
@@ -564,5 +599,66 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.suggestions-note {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.suggestions-grid {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.suggestion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  padding: 0.75rem;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  transition: background 0.15s;
+  min-width: 130px;
+  max-width: 130px;
+  flex-shrink: 0;
+}
+
+.suggestion-card:hover {
+  background: #f9fafb;
+}
+
+.suggestion-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #f9fafb;
+  padding: 4px;
+}
+
+.suggestion-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.suggestion-meta {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.suggestion-rating {
+  font-size: 0.7rem;
+  color: #BA7517;
 }
 </style>

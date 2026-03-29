@@ -22,6 +22,11 @@
           :filters="userFilters"
           :sortOptions="sortOptions"
           :searchFields="searchFields"
+          :attentionIds="attentionIds"
+          :initialAttention="route.query.attention === 'true'"
+          :initialFilters="initialFilters"
+          :initialSort="initialSort"
+          :initialSortDir="initialSortDir"
           searchPlaceholder="Search by name, email or job title..."
           detailRoute="/users"
           :pageSize="10"
@@ -33,9 +38,29 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import DataTableFull from '../../components/DataTableFull.vue'
 import { useUsers } from '../../composables/useUsers'
+
+const route = useRoute()
+
+const initialFilters = ref({})
+const initialSort = ref('')
+const initialSortDir = ref('asc')
+
+onMounted(() => {
+  const q = route.query
+  const filters = {}
+  if (q.role) filters.role = q.role
+  if (q.gender) filters.gender = q.gender
+  if (q.state) filters.state = q.state
+  if (q.city) filters.city = q.city
+  if (q.age_range) filters.age_range = q.age_range
+  initialFilters.value = filters
+  if (q.sort) initialSort.value = q.sort
+  if (q.dir) initialSortDir.value = q.dir
+})
 
 const { users, loading, error } = useUsers()
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from services.users import get_users_list, get_users_summary, get_user_detail, get_users_insights, get_users_geo
+from services.users import get_users_list, get_users_summary, get_user_detail, get_users_insights, get_users_geo, get_user_suggestions
 
 router = APIRouter()
 
@@ -35,5 +35,12 @@ async def users_geo():
 async def user_detail(user_id: int):
     try:
         return await get_user_detail(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/{user_id}/suggestions")
+async def user_suggestions(user_id: int):
+    try:
+        return await get_user_suggestions(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

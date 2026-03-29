@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  //baseURL: 'http://127.0.0.1:8000/' //dev
-  baseURL: 'https://jta-take-home-exercise.onrender.com' //prod
+  baseURL: import.meta.env.VITE_API_URL
 })
 
 export const getUsersSummary = () => api.get('/users/summary')
@@ -15,3 +14,6 @@ export const getProductsInsights = () => api.get('/products/insights')
 export const getUsersInsights = () => api.get('/users/insights')
 export const getProductsAggregation = () => api.get('/products/aggregation')
 export const getUsersGeo = () => api.get('/users/geo')
+export const aiSearch = (query) => api.post('/search', { query })
+
+export const getUserSuggestions = (id) => api.get(`/users/${id}/suggestions`)
