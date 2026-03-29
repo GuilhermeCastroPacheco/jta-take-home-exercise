@@ -86,6 +86,8 @@ const drawerOpen = ref(false)
 .layout {
   display: flex;
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .sidebar {
@@ -162,6 +164,8 @@ const drawerOpen = ref(false)
   flex: 1;
   padding: 2rem;
   background: #f9fafb;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .nav-item--sub {

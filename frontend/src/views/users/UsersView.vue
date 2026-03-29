@@ -175,6 +175,11 @@ const userColumns = [
   .row {
     grid-template-columns: 1fr;
   }
+
+  .card {
+    padding: 1rem;
+    overflow: hidden;
+  }
 }
 
 </style>
