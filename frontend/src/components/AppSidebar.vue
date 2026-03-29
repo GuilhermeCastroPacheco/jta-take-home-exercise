@@ -43,23 +43,23 @@
         <span class="sidebar-logo">JTA</span>
       </template>
       <nav class="sidebar-nav">
-        <RouterLink to="/" class="nav-item">
+        <RouterLink to="/" class="nav-item" @click="drawerOpen = false">
           <i class="pi pi-home" />
           Home
         </RouterLink>
-        <RouterLink to="/users" class="nav-item">
+        <RouterLink to="/users" class="nav-item" @click="drawerOpen = false">
           <i class="pi pi-users" />
           Users
         </RouterLink>
-        <RouterLink to="/users/all" class="nav-item nav-item--sub">
+        <RouterLink to="/users/all" class="nav-item nav-item--sub" @click="drawerOpen = false">
           <i class="pi pi-table" />
           Users Detail
         </RouterLink>
-        <RouterLink to="/products" class="nav-item">
+        <RouterLink to="/products" class="nav-item" @click="drawerOpen = false">
           <i class="pi pi-box" />
           Products
         </RouterLink>
-        <RouterLink to="/products/all" class="nav-item nav-item--sub">
+        <RouterLink to="/products/all" class="nav-item nav-item--sub" @click="drawerOpen = false">
           <i class="pi pi-table" />
           Products Detail
         </RouterLink>
