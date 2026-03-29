@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import List
 
 class ReviewSchema(BaseModel):
     rating: int
@@ -21,7 +21,7 @@ class ProductSchema(BaseModel):
     discountPercentage: float
     rating: float
     stock: int
-    brand: Optional[str] = None
+    brand: str | None = None
     sku: str
     availabilityStatus: str
     minimumOrderQuantity: int

@@ -31,16 +31,16 @@ async def users_geo():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{user_id}")
-async def user_detail(user_id: int):
-    try:
-        return await get_user_detail(user_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
 @router.get("/{user_id}/suggestions")
 async def user_suggestions(user_id: int):
     try:
         return await get_user_suggestions(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{user_id}")
+async def user_detail(user_id: int):
+    try:
+        return await get_user_detail(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

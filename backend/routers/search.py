@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import httpx
 import os
+import json
 
 router = APIRouter()
 
@@ -75,7 +76,6 @@ async def ai_search(body: SearchQuery):
             )
             data = response.json()
             text = data["content"][0]["text"]
-            import json
             clean = text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean)
     except Exception as e:

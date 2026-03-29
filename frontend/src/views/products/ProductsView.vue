@@ -35,7 +35,7 @@
         />
       </div>
 
-      <!-- Chart1 e Chart2 -->
+      <!-- Charts -->
       <div class="row">
         <div class="card">
           <h3>Product aggregation</h3>
@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <!-- Tabela de produtos recentes -->
+      <!-- Recent products table -->
       <div class="card">
         <div class="card-header">
           <h3>Recent products</h3>

@@ -44,7 +44,7 @@
         />
       </div>
 
-      <!-- Chart1 e Chart2 -->
+      <!-- Charts -->
       <div class="row">
         <div class="card">
           <h3>Avg. review rating by user segment</h3>
@@ -64,7 +64,7 @@
         </div>
       </div>
 
-      <!-- Table1 e Table2 -->
+      <!-- Aggregation tables -->
       <div class="row">
         <div class="card">
           <div class="card-content">

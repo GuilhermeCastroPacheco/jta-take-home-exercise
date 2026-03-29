@@ -22,7 +22,6 @@
           :filters="userFilters"
           :sortOptions="sortOptions"
           :searchFields="searchFields"
-          :attentionIds="attentionIds"
           :initialAttention="route.query.attention === 'true'"
           :initialFilters="initialFilters"
           :initialSort="initialSort"

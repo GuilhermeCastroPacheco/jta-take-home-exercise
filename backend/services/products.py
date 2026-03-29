@@ -14,12 +14,12 @@ async def get_products_summary() -> dict:
     raw = await fetch_products()
     products = parse_products(raw)
 
-    # Métricas gerais
+    # General metrics
     avg_price = sum(p.price for p in products) / len(products)
     avg_rating = sum(p.rating for p in products) / len(products)
     avg_discount = sum(p.discountPercentage for p in products) / len(products)
 
-    # Agregação por categoria
+    # Aggregation by category
     category_map = {}
     for p in products:
         if p.category not in category_map:
@@ -40,29 +40,22 @@ async def get_products_summary() -> dict:
         for cat, vals in category_map.items()
     ]
 
-    # Distribuição por availability status
+    # Availability status distribution
     availability_distribution = {}
     for p in products:
         availability_distribution[p.availabilityStatus] = availability_distribution.get(p.availabilityStatus, 0) + 1
 
-    statuses = set(p.availabilityStatus for p in products)
-    print("Statuses found:", statuses)
-    low_by_status = [p for p in products if p.availabilityStatus.lower() in ["low stock", "out of stock"]]
-    print("Low by status:", len(low_by_status))
-    low_by_stock = [p for p in products if p.stock < p.minimumOrderQuantity]
-    print("Low by stock:", len(low_by_stock))
-
-    # Produtos com baixo stock (stock abaixo do minimumOrderQuantity)
+    # Products needing attention: stock below minimumOrderQuantity or status Low/Out of Stock
     low_stock = [
         p.model_dump() for p in products
         if p.stock < p.minimumOrderQuantity
         or p.availabilityStatus.lower() in ["low stock", "out of stock"]
     ]
 
-    # Top 5 produtos melhor avaliados
+    # Top 5 highest rated products
     top_rated = sorted(products, key=lambda x: x.rating, reverse=True)[:5]
 
-    # Produtos recentes (últimos 5 por id)
+    # Most recent products (last 5 by id)
     recent_products = sorted(products, key=lambda x: x.id, reverse=True)[:5]
 
     return {
@@ -81,19 +74,19 @@ async def get_products_insights() -> dict:
     raw = await fetch_products()
     products = parse_products(raw)
 
-    # Relação preço vs rating (para scatter plot)
+    # Price vs rating data for scatter plot
     price_vs_rating = [
         {"id": p.id, "title": p.title, "price": p.price, "rating": p.rating, "category": p.category}
         for p in products
     ]
 
-    # Oportunidades de desconto: desconto alto + rating alto
+    # High discount + high rating products
     discount_opportunities = [
         p.model_dump() for p in products
         if p.discountPercentage >= 10 and p.rating >= 4.5
     ]
 
-    # Risco de rutura de stock
+    # Products at stock risk (stock below minimum order quantity)
     stock_risk = [
         {
             "id": p.id,
@@ -106,7 +99,7 @@ async def get_products_insights() -> dict:
         if p.stock < p.minimumOrderQuantity
     ]
 
-    # Distribuição de preços por categoria (para box plot ou bar chart)
+    # Price distribution by category
     price_distribution = {}
     for p in products:
         if p.category not in price_distribution:

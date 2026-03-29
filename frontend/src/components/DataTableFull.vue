@@ -157,7 +157,7 @@ watch(() => props.data, () => {
   currentPage.value = 1
 })
 
-// Dados filtrados por todos os filtros excepto o filtro atual
+// Data filtered by all active filters except the current one
 const dataFilteredExcept = (excludeField) => {
   let result = [...(props.data || [])]
 
@@ -189,7 +189,7 @@ const dataFilteredExcept = (excludeField) => {
   return result
 }
 
-// Opções disponíveis para cada filtro baseadas nos dados já filtrados pelos outros
+// Available options for each filter based on data already filtered by others
 const availableOptions = (filter) => {
   const data = dataFilteredExcept(filter.field)
   const values = data.map(row =>
@@ -198,7 +198,7 @@ const availableOptions = (filter) => {
   return [...new Set(values)].sort()
 }
 
-// Watch para limpar filtros que ficam inválidos
+// Clear filters that become invalid when another filter changes
 watch(activeFilters, (newFilters) => {
   props.filters.forEach(filter => {
     const val = newFilters[filter.field]

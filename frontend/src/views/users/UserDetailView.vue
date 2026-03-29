@@ -285,21 +285,19 @@ const user = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const suggestions = ref(null)
-const suggestionsLoading = ref(true)
 
 onMounted(async () => {
   try {
     const res = await getUser(route.params.id)
     user.value = res.data
 
-    // Buscar sugestões em paralelo
+    // Fetch product suggestions
     const suggestionsRes = await getUserSuggestions(route.params.id)
     suggestions.value = suggestionsRes.data
   } catch (e) {
     error.value = 'Failed to load user'
   } finally {
     loading.value = false
-    suggestionsLoading.value = false
   }
 })
 </script>
@@ -592,7 +590,6 @@ onMounted(async () => {
   .suggestions-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  
 }
 
 .left-col {

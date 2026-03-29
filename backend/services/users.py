@@ -31,43 +31,41 @@ async def get_users_summary() -> dict:
     raw = await fetch_users()
     users = parse_users(raw)
 
-    # Distribuição por género
+    # Gender distribution
     gender_distribution = {}
     for u in users:
         gender_distribution[u.gender] = gender_distribution.get(u.gender, 0) + 1
 
-    # Distribuição por faixa etária
+    # Age group distribution
     age_groups = {"18-25": 0, "26-30": 0, "31-35": 0, "36-40": 0, "40+": 0}
     for u in users:
         age_groups[get_age_group(u.age)] += 1
 
-    # Top empresas por número de utilizadores
+    # Top companies by number of users
     company_counts = {}
     for u in users:
         name = u.company.name
         company_counts[name] = company_counts.get(name, 0) + 1
     top_companies = sorted(company_counts.items(), key=lambda x: x[1], reverse=True)[:5]
 
-    # Distribuição por role
+    # Role distribution
     role_distribution = {}
     for u in users:
         role_distribution[u.role] = role_distribution.get(u.role, 0) + 1
 
-    # Utilizadores recentes (últimos 5 por id)
+    # Most recent users (last 5 by id)
     recent_users = sorted(users, key=lambda x: x.id, reverse=True)[:5]
 
-    # Distribuição age + gender
+    # Age + gender distribution
     age_gender_distribution = {}
     for u in users:
         key = f"{u.gender} {get_age_group(u.age)}"
         age_gender_distribution[key] = age_gender_distribution.get(key, 0) + 1
 
-    # Percentagem de utilizadores com média de reviews >= 4
+    # Percentage of users with avg review rating >= 4
     products_raw = await fetch_products()
     products = [ProductSchema(**p) for p in products_raw["products"]]
-
     email_to_user = {u.email.lower(): u for u in users}
-
     user_ratings = {}
     for product in products:
         for review in product.reviews:
@@ -76,7 +74,6 @@ async def get_users_summary() -> dict:
                 if email not in user_ratings:
                     user_ratings[email] = []
                 user_ratings[email].append(review.rating)
-
     users_with_reviews = len(user_ratings)
     high_rating_count = sum(
         1 for ratings in user_ratings.values()
@@ -98,13 +95,11 @@ async def get_users_summary() -> dict:
 async def get_user_detail(user_id: int) -> dict:
     users_raw = await fetch_users()
     products_raw = await fetch_products()
-
     raw = await fetch_user(user_id)
     user = UserSchema(**raw)
-
     products = [ProductSchema(**p) for p in products_raw["products"]]
 
-    # Reviews do utilizador
+    # User reviews
     user_reviews = []
     for product in products:
         for review in product.reviews:
@@ -124,21 +119,18 @@ async def get_user_detail(user_id: int) -> dict:
     reviews_summary = {}
     if user_reviews:
         ratings = [r["rating"] for r in user_reviews]
-        
         by_category = {}
         by_tags = {}
         by_product = {}
-        
+
         for r in user_reviews:
-            # by category
+            # By category
             cat = r["productCategory"]
             by_category[cat] = by_category.get(cat, 0) + 1
-            
-            # by tags
+            # By tags
             for tag in r["productTags"]:
                 by_tags[tag] = by_tags.get(tag, 0) + 1
-            
-            # by product
+            # By product
             by_product[r["productTitle"]] = by_product.get(r["productTitle"], 0) + 1
 
         reviews_summary = {
@@ -155,8 +147,7 @@ async def get_user_detail(user_id: int) -> dict:
             reviews_summary["by_rating"][r["rating"]] += 1
 
     # University data
-    universities = get_universities()
-    university_data = universities.get(user.university, {})
+    university_data = UNIVERSITIES.get(user.university, {})
 
     return {
         **user.model_dump(),
@@ -168,10 +159,8 @@ async def get_user_detail(user_id: int) -> dict:
 async def get_users_insights() -> dict:
     users_raw = await fetch_users()
     products_raw = await fetch_products()
-
     users = parse_users(users_raw)
     products = [ProductSchema(**p) for p in products_raw["products"]]
-
     email_to_user = {u.email.lower(): u for u in users}
 
     reviews = []
@@ -206,7 +195,6 @@ async def get_users_insights() -> dict:
 
     emails_with_reviews = set(user_ratings.keys())
     no_review_count = sum(1 for u in users if u.email.lower() not in emails_with_reviews)
-
     all_categories = sorted(set(r["productCategory"] for r in reviews))
     all_brands = sorted(set(r["productBrand"] for r in reviews))
     all_tags = sorted(set(tag for r in reviews for tag in r["productTags"]))
@@ -251,7 +239,6 @@ async def get_users_geo() -> dict:
                     continue
                 state = uni_data["state"]
                 city = uni_data["city"]
-
                 if state not in by_city:
                     by_city[state] = {}
                 if city not in by_city[state]:
@@ -259,7 +246,6 @@ async def get_users_geo() -> dict:
                 by_city[state][city]["count"] += 1
                 by_city[state][city]["universities"][u.university] = \
                     by_city[state][city]["universities"].get(u.university, 0) + 1
-
             else:
                 continue
 
@@ -279,14 +265,12 @@ async def get_users_geo() -> dict:
 async def get_user_suggestions(user_id: int) -> dict:
     raw = await fetch_user(user_id)
     user = UserSchema(**raw)
-
     products_raw = await fetch_products()
     products = [ProductSchema(**p) for p in products_raw["products"]]
-
     users_raw = await fetch_users()
     users = parse_users(users_raw)
 
-    # Reviews do utilizador
+    # If user has no reviews, return empty suggestions
     user_reviews = []
     for product in products:
         for review in product.reviews:
@@ -299,11 +283,10 @@ async def get_user_suggestions(user_id: int) -> dict:
                     "rating": review.rating
                 })
 
-    # Se não tiver reviews não há sugestões
     if not user_reviews:
         return {"suggestions": []}
 
-    # Extrair preferências do utilizador
+    # Extract user preferences from review history
     reviewed_ids = {r["productId"] for r in user_reviews}
     category_counts = {}
     brand_counts = {}
@@ -317,14 +300,7 @@ async def get_user_suggestions(user_id: int) -> dict:
         for tag in r["productTags"]:
             tag_counts[tag] = tag_counts.get(tag, 0) + 1
 
-    # Utilizadores semelhantes (mesmo género e faixa etária)
-    def get_age_group(age):
-        if age <= 25: return "18-25"
-        if age <= 30: return "26-30"
-        if age <= 35: return "31-35"
-        if age <= 40: return "36-40"
-        return "40+"
-
+    # Similar users (same gender and age group)
     user_age_group = get_age_group(user.age)
     similar_users = [
         u for u in users
@@ -333,7 +309,7 @@ async def get_user_suggestions(user_id: int) -> dict:
         and u.id != user.id
     ]
 
-    # Produtos reviewados por utilizadores semelhantes
+    # Products reviewed by similar users
     similar_reviewed = {}
     for product in products:
         for review in product.reviews:
@@ -341,7 +317,7 @@ async def get_user_suggestions(user_id: int) -> dict:
                 if review.reviewerEmail.lower() == su.email.lower():
                     similar_reviewed[product.id] = similar_reviewed.get(product.id, 0) + review.rating
 
-    # Score para cada produto não reviewado
+    # Score each unreviewed product
     scored = []
     for product in products:
         if product.id in reviewed_ids:
@@ -351,30 +327,30 @@ async def get_user_suggestions(user_id: int) -> dict:
 
         score = 0
 
-        # Score por categoria
+        # Score by category
         if product.category in category_counts:
             score += category_counts[product.category] * 3
 
-        # Score por brand
+        # Score by brand
         if product.brand and product.brand in brand_counts:
             score += brand_counts[product.brand] * 2
 
-        # Score por tags
+        # Score by tags
         for tag in product.tags:
             if tag in tag_counts:
                 score += tag_counts[tag]
 
-        # Score por utilizadores semelhantes
+        # Score by similar users
         if product.id in similar_reviewed:
             score += similar_reviewed[product.id] * 1.5
 
-        # Score por rating do produto
+        # Score by product rating
         score += product.rating
 
         if score > 0:
             scored.append((product, score))
 
-    # Top 6 produtos
+    # Top 6 products
     scored.sort(key=lambda x: x[1], reverse=True)
     top = scored[:6]
 

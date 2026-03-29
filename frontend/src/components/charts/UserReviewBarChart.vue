@@ -155,7 +155,7 @@ const chartData = computed(() => {
     groups[key].count += 1
   })
 
-  // Só labels com count > 0
+  // Only render labels with at least one user
   const allLabels = selectedSegment.value === 'gender'
     ? Object.keys(groups)
     : selectedSegment.value === 'age'

@@ -33,7 +33,7 @@
         />
       </div>
 
-      <!-- Mapa + Gráfico circular -->
+      <!-- Map and segment chart -->
       <div class="row">
         <div class="card card--wide">
           <h3>User distribution by location</h3>
@@ -45,7 +45,7 @@
         </div>
       </div>
 
-      <!-- Tabela de utilizadores recentes -->
+      <!-- Recent users table -->
       <div class="card">
         <div class="card-header">
           <h3>Recent users</h3>
@@ -90,7 +90,6 @@ const userColumns = [
   { field: 'age', header: 'Age', muted: true },
   { field: 'address', header: 'Location', formatter: (row) => `${row.address.city}, ${row.address.state}` },
   { field: 'role', header: 'Role', muted: true }
-  //{ field: 'company', header: 'Job title', formatter: (row) => `${row.company.title}`, muted: true }
 ]
 </script>
 

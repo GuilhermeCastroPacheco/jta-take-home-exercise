@@ -95,9 +95,4 @@ tr:last-child td {
 td.muted {
   color: #6b7280;
 }
-
-.table-wrapper {
-  overflow-x: auto;
-  width: 100%;
-}
 </style>

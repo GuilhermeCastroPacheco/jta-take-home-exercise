@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
 
-    <!-- Sidebar desktop -->
+    <!-- Desktop sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <span class="sidebar-logo">JTA</span>
@@ -66,7 +66,7 @@
       </nav>
     </Drawer>
 
-    <!-- Conteúdo principal -->
+    <!-- Main content -->
     <main class="main-content">
       <slot />
     </main>
