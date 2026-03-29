@@ -338,6 +338,20 @@ const stockClass = computed(() => {
   .row {
     grid-template-columns: 1fr;
   }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .header-left {
+    flex-wrap: wrap;
+  }
+
+  .back-link {
+    align-self: flex-end;
+  }
 }
 
 .card--description {

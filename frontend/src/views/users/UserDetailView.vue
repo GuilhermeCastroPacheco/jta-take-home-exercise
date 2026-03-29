@@ -41,7 +41,7 @@
             </div>
             <div class="info-row">
               <span class="info-label">Email</span>
-              <span class="info-value">{{ user.email }}</span>
+              <span class="info-value info-email">{{ user.email }}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Phone</span>
@@ -551,6 +551,13 @@ onMounted(async () => {
   .row-inner {
     grid-template-columns: 1fr;
   }
+
+  .info-email {
+    overflow-x: auto;
+    max-width: 180px;
+    white-space: nowrap;
+  }
+  
 }
 
 .left-col {
