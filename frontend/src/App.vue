@@ -9,12 +9,17 @@ import AppSidebar from './components/AppSidebar.vue'
 </script>
 
 <style>
-html, body {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  background: var(--p-surface-50);
-  color: var(--p-text-color);
-  transition: background 0.3s, color 0.3s;
+}
+
+body {
   font-family: 'Inter', sans-serif;
+  background: #f9fafb;
+  color: #111827;
 }
 </style>
