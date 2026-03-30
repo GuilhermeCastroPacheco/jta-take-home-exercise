@@ -25,7 +25,7 @@
     <h4>{{ selectedState }}</h4>
     <div class="city-list">
 
-      <!-- Address e Company — estrutura simples -->
+      <!-- Address and company: simple structure -->
       <template v-if="selectedType !== 'university'">
         <div
           v-for="(count, city) in currentData.by_city[selectedState]"
@@ -37,7 +37,7 @@
         </div>
       </template>
 
-      <!-- University — estrutura dois níveis -->
+      <!-- University: two-level structure -->
       <template v-else>
         <div
           v-for="(cityData, city) in currentData.by_city[selectedState]"
@@ -159,7 +159,6 @@ const renderMap = () => {
 
   const states = topojson.feature(usAtlas, usAtlas.objects.states)
 
-  // Tooltip
   const tooltip = d3.select(container)
     .append('div')
     .attr('class', 'map-tooltip')

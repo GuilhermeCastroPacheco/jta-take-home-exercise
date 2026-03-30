@@ -98,14 +98,14 @@ const availableCategories = computed(() => {
   return props.aggregationData.filter_options.categories
 })
 
-// Reset brand se já não estiver disponível após mudar categoria
+// Reset brand if no longer available after category change
 watch(selectedCategory, () => {
   if (selectedBrand.value && !availableBrands.value.includes(selectedBrand.value)) {
     selectedBrand.value = ''
   }
 })
 
-// Reset category se já não estiver disponível após mudar brand
+// Reset category if no longer available after brand change
 watch(selectedBrand, () => {
   if (selectedCategory.value && !availableCategories.value.includes(selectedCategory.value)) {
     selectedCategory.value = ''
