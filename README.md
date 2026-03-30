@@ -60,7 +60,7 @@ Create a `.env` file inside `backend/` with the following content:
 
 ```
 DUMMYJSON_BASE_URL=https://dummyjson.com
-ANTHROPIC_API_KEY=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
+ANTHROPIC_API_KEY=your_api_key_here  # API key provided by email
 ```
 
 ```bash
